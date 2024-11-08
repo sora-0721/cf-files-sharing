@@ -1,0 +1,15 @@
+name = "file-share-worker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+AUTH_PASSWORD = ""  # Will be set via environment variables
+
+[[r2_buckets]]
+binding = "FILE_BUCKET"
+bucket_name = "file-share"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "file_share"
+database_id = "34b2c495-602a-4b7e-8a10-668a63294119"    # Will be set during deployment
