@@ -27,7 +27,7 @@
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/your-username/cloudflare-file-share.git
+git clone https://github.com/joyance-professional/cf-files-sharing
 cd cloudflare-file-share
 ```
 
@@ -201,5 +201,5 @@ file-share-worker/
 
 ## 问题反馈
 
-如果你发现任何问题或有改进建议，请创建一个 [issue](https://github.com/your-username/cloudflare-file-share/issues)。
+如果你发现任何问题或有改进建议，请创建一个 [issue](https://github.com/joyance-professional/cf-files-sharing/issues)。
 
