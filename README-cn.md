@@ -1,5 +1,5 @@
 # CloudFlare File Share
-中文简体｜English
+[中文简体](https://github.com/joyance-professional/cf-files-sharing/blob/main/README.md)｜English
 
 一个运行在 Cloudflare Workers 上的简洁文件分享工具，支持 R2 和 D1 双存储方案。
 
