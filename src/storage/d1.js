@@ -1,4 +1,4 @@
-// storage/d1.js
+// src/storage/d1.js
 
 class D1Storage {
     constructor(db) {
@@ -62,6 +62,30 @@ class D1Storage {
         } catch (error) {
             console.error('D1 retrieve error:', error);
             throw error;
+        }
+    }
+
+    async delete(id) {
+        try {
+            const result = await this.db.prepare(
+                'DELETE FROM files WHERE id = ?'
+            ).bind(id).run();
+            return result.success;
+        } catch (error) {
+            console.error('D1 delete error:', error);
+            return false;
+        }
+    }
+
+    async list() {
+        try {
+            const results = await this.db.prepare(
+                'SELECT id, filename, size, storage_type, created_at FROM files ORDER BY created_at DESC'
+            ).all();
+            return results.results || [];
+        } catch (error) {
+            console.error('D1 list error:', error);
+            return [];
         }
     }
 }
