@@ -129,6 +129,10 @@ export const mainTemplate = (lang = 'en', files = []) => {
       bottom: 10px;
       left: 10px;
     }
+    .storage-options {
+      margin: 1rem 0;
+      text-align: center;
+    }
     .progress {
       width: 100%;
       height: 4px;
@@ -215,6 +219,13 @@ export const mainTemplate = (lang = 'en', files = []) => {
         <button class="open-btn" onclick="document.getElementById('fileInput').click()">${isZh ? '选择文件' : 'Choose Files'}</button>
         <button class="upload-btn" onclick="uploadFiles()">${isZh ? '上传' : 'Upload'}</button>
       </div>
+      <div class="storage-options">
+        <label>${isZh ? '存储方式' : 'Storage'}:</label>
+        <select id="storageType">
+          <option value="r2">R2 ${isZh ? '存储' : 'Storage'}</option>
+          <option value="d1">D1 ${isZh ? '数据库' : 'Database'}</option>
+        </select>
+      </div>
       <div class="fee-warning" id="feeWarning"></div>
       <div class="progress">
         <div class="progress-bar" id="progressBar"></div>
@@ -266,6 +277,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
     const progress = document.querySelector('.progress');
     const uploadResult = document.getElementById('uploadResult');
     const uploadingIndicator = document.getElementById('uploadingIndicator');
+    const storageTypeSelect = document.getElementById('storageType');
     const lang = navigator.language.includes('zh') ? 'zh' : 'en';
 
     dragDropArea.addEventListener('dragover', (e) => {
@@ -312,16 +324,20 @@ export const mainTemplate = (lang = 'en', files = []) => {
       uploadResult.style.display = 'none';
       uploadingIndicator.style.display = 'block';
 
+      const storageType = storageTypeSelect.value;
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        let storageType = 'd1';
-        if (file.size > 25 * 1024 * 1024) {
-          storageType = 'r2';
+
+        // 保留对存储介质的选择
+        let currentStorageType = storageType;
+        if (file.size > 25 * 1024 * 1024 && currentStorageType !== 'r2') {
+          currentStorageType = 'r2';
         }
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('storage', storageType);
+        formData.append('storage', currentStorageType);
 
         try {
           const response = await fetch('/upload', {
