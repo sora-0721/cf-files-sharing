@@ -80,8 +80,9 @@ export default {
       const file = formData.get('file');
       let storageType = formData.get('storage');
 
-      if (file.size > 25 * 1024 * 1024) {
-        storageType = 'r2';
+      // 保留对存储介质的选择
+      if (file.size > 25 * 1024 * 1024 && storageType !== 'r2') {
+        storageType = 'r2'; // 大于25MB的文件强制使用R2
       }
 
       const metadata = await storageManager.store(file, storageType);
