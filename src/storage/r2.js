@@ -7,7 +7,7 @@ class R2Storage {
 
     async store(id, file) {
         await this.bucket.put(id, file.stream(), {
-            metadata: {
+            customMetadata: {
                 filename: file.name
             }
         });
@@ -18,7 +18,7 @@ class R2Storage {
         if (object) {
             return {
                 stream: object.body,
-                filename: object.metadata?.filename,
+                filename: object.customMetadata?.filename || 'unknown',
                 storage_type: 'r2'
             };
         }
