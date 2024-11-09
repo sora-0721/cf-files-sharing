@@ -214,3 +214,7 @@ file-share-worker/
 ## 问题反馈
 
 如果你发现任何问题或有改进建议，请创建一个 [issue](https://github.com/joyance-professional/cf-files-sharing/issues)。
+
+## 准备更新：
+-[] 2. 在 storage/manager.js 中添加文件大小限制
+由于将二进制数据转换为 Base64 后，数据大小会增加约 33%，建议对存储到 D1 的文件大小进行限制，例如限制在 1MB 以内。
