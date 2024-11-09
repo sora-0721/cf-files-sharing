@@ -212,7 +212,7 @@ file-share-worker/
 
 - Cloudflare Workers Platform
 - Claude-3.5-Sonnet AI
-- Chat-GPT-01-preview | [chat history](https://chatgpt.com/share/672f2565-470c-8012-a222-904ca69a4692)
+- Chat-GPT-o1-preview | [chat history](https://chatgpt.com/share/672f2565-470c-8012-a222-904ca69a4692)
 
 ## Feedback
 
