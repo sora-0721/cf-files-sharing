@@ -29,15 +29,33 @@ class StorageManager {
   }
 
   async retrieve(id) {
-    // 尝试从 R2 存储中获取
-    let file = await this.r2Storage.retrieve(id);
+    // 尝试从 D1 存储中获取
+    let file = await this.d1Storage.retrieve(id);
     if (file) return file;
 
-    // 尝试从 D1 存储中获取
-    file = await this.d1Storage.retrieve(id);
+    // 尝试从 R2 存储中获取
+    file = await this.r2Storage.retrieve(id);
     if (file) return file;
 
     return null;
+  }
+
+  async delete(id) {
+    // 尝试从 D1 存储中删除
+    let success = await this.d1Storage.delete(id);
+    if (success) return true;
+
+    // 尝试从 R2 存储中删除
+    success = await this.r2Storage.delete(id);
+    if (success) return true;
+
+    return false;
+  }
+
+  async list() {
+    const d1Files = await this.d1Storage.list();
+    const r2Files = await this.r2Storage.list();
+    return [...d1Files, ...r2Files];
   }
 }
 
