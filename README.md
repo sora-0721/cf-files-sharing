@@ -71,7 +71,7 @@ wrangler d1 create file-share
 ```toml
 [[d1_databases]]
 binding = "DB"
-database_name = "file_share"
+database_name = "file-share"
 database_id = "your database ID" # obtained from the previous step
 ```
 
