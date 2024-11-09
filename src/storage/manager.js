@@ -1,60 +1,44 @@
+// storage/manager.js
+
+import { R2Storage } from './r2';
+import { D1Storage } from './d1';
+import { generateId } from '../utils/id';
+
 class StorageManager {
-    constructor(env) {
-        this.r2 = env.FILE_BUCKET;
-        this.db = env.DB;
+  constructor(env) {
+    this.r2Storage = new R2Storage(env.FILE_BUCKET);
+    this.d1Storage = new D1Storage(env.DB);
+  }
+
+  async store(file, storageType) {
+    const id = generateId();
+    const metadata = {
+      id,
+      filename: file.name,
+      size: file.size,
+      storage_type: storageType,
+    };
+
+    if (storageType === 'r2') {
+      await this.r2Storage.store(id, file);
+    } else {
+      await this.d1Storage.store(id, file);
     }
 
-    async store(file, storageType) {
-        const id = crypto.randomUUID().slice(0, 8);
-        const metadata = {
-            id,
-            filename: file.name,
-            size: file.size,
-            storage_type: storageType
-        };
+    return metadata;
+  }
 
-        if (storageType === 'r2') {
-            await this.r2.put(id, file.stream(), {
-                metadata: {
-                    filename: file.name
-                }
-            });
-        } else {
-            const arrayBuffer = await file.arrayBuffer();
-            await this.db.prepare(
-                'INSERT INTO files (id, filename, size, storage_type, content) VALUES (?, ?, ?, ?, ?)'
-            ).bind(id, file.name, file.size, storageType, arrayBuffer).run();
-        }
+  async retrieve(id) {
+    // Try to retrieve from R2 storage
+    let file = await this.r2Storage.retrieve(id);
+    if (file) return file;
 
-        return metadata;
-    }
+    // Try to retrieve from D1 storage
+    file = await this.d1Storage.retrieve(id);
+    if (file) return file;
 
-    async retrieve(id) {
-        // Try R2 first
-        const r2Object = await this.r2.get(id);
-        if (r2Object) {
-            return {
-                stream: r2Object.body,
-                filename: r2Object.metadata?.filename,
-                storage_type: 'r2'
-            };
-        }
-
-        // Try D1
-        const dbResult = await this.db.prepare(
-            'SELECT * FROM files WHERE id = ?'
-        ).bind(id).first();
-        
-        if (dbResult) {
-            return {
-                stream: new Response(dbResult.content).body,
-                filename: dbResult.filename,
-                storage_type: 'd1'
-            };
-        }
-
-        return null;
-    }
+    return null;
+  }
 }
 
 export { StorageManager };
