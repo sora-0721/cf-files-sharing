@@ -1,12 +1,13 @@
-// html/templates.js
+// src/html/templates.js
 
-export const loginTemplate = (message = '') => {
+export const loginTemplate = (lang = 'en', message = '') => {
+  const isZh = lang === 'zh';
   return `
 <!DOCTYPE html>
-<html>
+<html lang="${isZh ? 'zh' : 'en'}">
 <head>
   <meta charset="UTF-8">
-  <title>Login - File Share</title>
+  <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -54,11 +55,11 @@ export const loginTemplate = (message = '') => {
 </head>
 <body>
   <div class="login-form">
-    <h2>Login</h2>
+    <h2>${isZh ? '登录' : 'Login'}</h2>
     ${message ? `<p class="error-message">${message}</p>` : ''}
     <form method="POST" action="/auth">
-      <input type="password" name="password" placeholder="Password" required>
-      <button type="submit">Login</button>
+      <input type="password" name="password" placeholder="${isZh ? '密码' : 'Password'}" required>
+      <button type="submit">${isZh ? '登录' : 'Login'}</button>
     </form>
   </div>
 </body>
@@ -66,13 +67,14 @@ export const loginTemplate = (message = '') => {
 `;
 };
 
-export const mainTemplate = () => {
+export const mainTemplate = (lang = 'en') => {
+  const isZh = lang === 'zh';
   return `
 <!DOCTYPE html>
-<html>
+<html lang="${isZh ? 'zh' : 'en'}">
 <head>
   <meta charset="UTF-8">
-  <title>File Share</title>
+  <title>${isZh ? '文件分享' : 'File Share'}</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -134,16 +136,16 @@ export const mainTemplate = () => {
 <body>
   <div class="container">
     <div class="upload-form">
-      <h2>Upload File</h2>
+      <h2>${isZh ? '上传文件' : 'Upload File'}</h2>
       <input type="file" id="fileInput" required>
       <div class="storage-options">
-        <label>Storage:</label>
+        <label>${isZh ? '存储方式' : 'Storage'}:</label>
         <select id="storageType">
-          <option value="r2">R2 Storage</option>
-          <option value="d1">D1 Database</option>
+          <option value="r2">R2 ${isZh ? '存储' : 'Storage'}</option>
+          <option value="d1">D1 ${isZh ? '数据库' : 'Database'}</option>
         </select>
       </div>
-      <button onclick="uploadFile()">Upload</button>
+      <button onclick="uploadFile()">${isZh ? '上传' : 'Upload'}</button>
       <div class="progress">
         <div class="progress-bar"></div>
       </div>
@@ -152,6 +154,13 @@ export const mainTemplate = () => {
   </div>
 
   <script>
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+      if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+      return (bytes / 1073741824).toFixed(2) + ' GB';
+    }
+
     async function uploadFile() {
       const fileInput = document.getElementById('fileInput');
       const storageSelect = document.getElementById('storageType');
@@ -169,11 +178,22 @@ export const mainTemplate = () => {
         storageSelect.disabled = false;
       }
 
+      const estimatedCost = ((file.size / (1024 * 1024)) * 0.02).toFixed(2); // 假设每GB 0.02美元
+      const lang = navigator.language.includes('zh') ? 'zh' : 'en';
+      const confirmMessage = lang === 'zh'
+        ? \`上传此文件可能产生约 \$\${estimatedCost} 的费用。是否继续？\`
+        : \`Uploading this file may incur a cost of approximately \$\${estimatedCost}. Do you want to continue?\`;
+
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('storage', storageSelect.value);
 
       progress.style.display = 'block';
+      progressBar.style.width = '0%';
       result.style.display = 'none';
 
       try {
@@ -182,19 +202,25 @@ export const mainTemplate = () => {
           body: formData,
         });
 
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
         const data = await response.json();
         const shareUrl = \`\${window.location.origin}/file/\${data.id}\`;
 
         result.style.display = 'block';
         result.innerHTML = \`
-          <p>File uploaded successfully!</p>
-          <p>Share URL: <a href="\${shareUrl}" target="_blank">\${shareUrl}</a></p>
+          <p>\${lang === 'zh' ? '文件上传成功！' : 'File uploaded successfully!'}</p>
+          <p>\${lang === 'zh' ? '分享链接' : 'Share URL'}: <a href="\${shareUrl}" target="_blank">\${shareUrl}</a></p>
         \`;
       } catch (error) {
         result.style.display = 'block';
-        result.innerHTML = 'Upload failed: ' + error.message;
+        result.innerHTML = (lang === 'zh' ? '上传失败: ' : 'Upload failed: ') + error.message;
       }
     }
+
+    // 更新进度条显示（如果需要，可以使用更高级的上传方法）
   </script>
 </body>
 </html>
