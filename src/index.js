@@ -23,9 +23,14 @@ export default {
         return errorResponse(lang === 'zh' ? '文件未找到' : 'File not found', 404);
       }
 
+      // 解决中文文件名下载问题
+      const filename = file.filename;
+      const encodedFilename = encodeURIComponent(filename);
+      const contentDisposition = `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`;
+
       return new Response(file.stream, {
         headers: {
-          'Content-Disposition': `attachment; filename="${file.filename}"`,
+          'Content-Disposition': contentDisposition,
           'Content-Type': 'application/octet-stream',
         },
       });
@@ -55,6 +60,20 @@ export default {
       return htmlResponse(loginTemplate(lang));
     }
 
+    // 文件删除处理
+    if (url.pathname === '/delete' && request.method === 'POST') {
+      const formData = await request.formData();
+      const id = formData.get('id');
+
+      const success = await storageManager.delete(id);
+
+      if (success) {
+        return jsonResponse({ success: true });
+      } else {
+        return jsonResponse({ success: false }, 400);
+      }
+    }
+
     // 文件上传处理
     if (url.pathname === '/upload' && request.method === 'POST') {
       const formData = await request.formData();
@@ -77,7 +96,9 @@ export default {
 
     // 主页面
     if (url.pathname === '/') {
-      return htmlResponse(mainTemplate(lang));
+      const files = await storageManager.list();
+
+      return htmlResponse(mainTemplate(lang, files));
     }
 
     return errorResponse(lang === 'zh' ? '未找到页面' : 'Not found', 404);
