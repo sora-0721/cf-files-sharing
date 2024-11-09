@@ -1,4 +1,4 @@
-// storage/manager.js
+// src/storage/manager.js
 
 import { R2Storage } from './r2';
 import { D1Storage } from './d1';
@@ -29,11 +29,11 @@ class StorageManager {
   }
 
   async retrieve(id) {
-    // Try to retrieve from R2 storage
+    // 尝试从 R2 存储中获取
     let file = await this.r2Storage.retrieve(id);
     if (file) return file;
 
-    // Try to retrieve from D1 storage
+    // 尝试从 D1 存储中获取
     file = await this.d1Storage.retrieve(id);
     if (file) return file;
 
