@@ -75,7 +75,13 @@ database_name = "file-share"
 database_id = "your database ID" # obtained from the previous step
 ```
 
-### Step 3: Configure environment variables
+### Step 3: Deploy
+
+Deploy to Cloudflare Workers:
+```bash
+wrangler deploy
+```
+### Step 4: Configure environment variables
 
 1. Set the authentication password:
 ```bash
@@ -83,19 +89,6 @@ wrangler secret put AUTH_PASSWORD
 ```
 When prompted, enter the password you want to set.
 
-### Step 4: Initialize the database
-
-Run database migrations:
-```bash
-wrangler d1 execute file-share --file=./migrations/init.sql
-```
-
-### Step 5: Deploy
-
-Deploy to Cloudflare Workers:
-```bash
-wrangler deploy
-```
 
 ## Usage Guide
 
