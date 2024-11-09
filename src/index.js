@@ -1,4 +1,4 @@
-// index.js
+// src/index.js
 
 import { Auth } from './auth';
 import { StorageManager } from './storage/manager';
@@ -10,13 +10,17 @@ export default {
     const url = new URL(request.url);
     const storageManager = new StorageManager(env);
 
-    // File download endpoint
+    // 获取用户的语言偏好
+    const acceptLanguage = request.headers.get('Accept-Language') || 'en';
+    const lang = acceptLanguage.includes('zh') ? 'zh' : 'en';
+
+    // 文件下载处理
     if (url.pathname.startsWith('/file/')) {
       const id = url.pathname.split('/')[2];
       const file = await storageManager.retrieve(id);
 
       if (!file) {
-        return errorResponse('File not found', 404);
+        return errorResponse(lang === 'zh' ? '文件未找到' : 'File not found', 404);
       }
 
       return new Response(file.stream, {
@@ -27,7 +31,7 @@ export default {
       });
     }
 
-    // Authentication check
+    // 认证检查
     if (!(await Auth.verifyAuth(request, env))) {
       if (url.pathname === '/auth' && request.method === 'POST') {
         const formData = await request.formData();
@@ -45,13 +49,13 @@ export default {
             },
           });
         } else {
-          return htmlResponse(loginTemplate('Invalid password'));
+          return htmlResponse(loginTemplate(lang, lang === 'zh' ? '密码错误' : 'Invalid password'));
         }
       }
-      return htmlResponse(loginTemplate());
+      return htmlResponse(loginTemplate(lang));
     }
 
-    // Handle file upload
+    // 文件上传处理
     if (url.pathname === '/upload' && request.method === 'POST') {
       const formData = await request.formData();
       const file = formData.get('file');
@@ -71,11 +75,11 @@ export default {
       });
     }
 
-    // Main page
+    // 主页面
     if (url.pathname === '/') {
-      return htmlResponse(mainTemplate());
+      return htmlResponse(mainTemplate(lang));
     }
 
-    return errorResponse('Not found', 404);
+    return errorResponse(lang === 'zh' ? '未找到页面' : 'Not found', 404);
   },
 };
