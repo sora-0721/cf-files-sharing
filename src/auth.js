@@ -1,4 +1,4 @@
-// auth.js
+// src/auth.js
 
 class Auth {
   static cookieName = 'auth_token';
