@@ -3,6 +3,7 @@
 [English](https://github.com/joyance-professional/cf-files-sharing/blob/main/README.md)｜[简体中文](https://github.com/joyance-professional/cf-files-sharing/blob/main/README-cn.md)
 
 A simple file sharing tool running on Cloudflare Workers, supporting R2 and D1 dual storage solutions.
+expample web | [view](https://files-ep.joyance.page)
 
 ## Features
 
