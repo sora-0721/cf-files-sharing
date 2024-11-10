@@ -2,13 +2,19 @@
 
 class Auth {
   static cookieName = 'auth_token';
-  static cookieExpiry = 30 * 24 * 60 * 60; // 30 days in seconds
+  static cookieExpiry = 30 * 24 * 60 * 60; // 30 天，单位为秒
 
   static async validatePassword(password, env) {
+    if (!env.AUTH_PASSWORD) {
+      throw new Error('AUTH_PASSWORD is not set in environment variables');
+    }
     return password === env.AUTH_PASSWORD;
   }
 
   static async generateToken(env) {
+    if (!env.AUTH_PASSWORD) {
+      throw new Error('AUTH_PASSWORD is not set in environment variables');
+    }
     const encoder = new TextEncoder();
     const data = encoder.encode(env.AUTH_PASSWORD);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
