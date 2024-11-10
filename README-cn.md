@@ -83,13 +83,16 @@
    database_id = "your-database-id" # 从上一步获取
    ```
 
-### 第 3 步：部署
+### 第 3 步：初始化数据库
 
-部署到 Cloudflare Workers：
+运行数据库迁移：
 
 ```bash
-wrangler deploy
+wrangler d1 execute file-share --file=./migrations/init.sql --remote
 ```
+
+> [!NOTE]
+> 确保在 `wrangler.toml` 文件中将 `"your-database-id"` 替换为实际的数据库 ID。同时，在运行数据库迁移时包括 `--remote` 标志以将其应用到远程 D1 数据库。
 
 ### 第 4 步：配置环境变量
 
@@ -101,16 +104,13 @@ wrangler deploy
 
    按提示输入您想设置的密码。
 
-### 第 5 步：初始化数据库
+### 第 5 步：部署
 
-运行数据库迁移：
+部署到 Cloudflare Workers：
 
 ```bash
-wrangler d1 execute file-share --file=./migrations/init.sql --remote
+wrangler deploy
 ```
-
-> [!NOTE]
-> 确保在 `wrangler.toml` 文件中将 `"your-database-id"` 替换为实际的数据库 ID。同时，在运行数据库迁移时包括 `--remote` 标志以将其应用到远程 D1 数据库。
 
 ## 使用指南
 
