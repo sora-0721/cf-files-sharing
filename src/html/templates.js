@@ -214,10 +214,16 @@ export const mainTemplate = (lang = 'en', files = []) => {
       width: 50px;
       height: 50px;
     }
+    .logout-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="logout-btn" onclick="logout()">${isZh ? '退出登录' : 'Logout'}</button>
     <div class="upload-form">
       <h2>${isZh ? '上传文件' : 'Upload File'}</h2>
       <div class="drag-drop" id="dragDropArea">
@@ -246,28 +252,32 @@ export const mainTemplate = (lang = 'en', files = []) => {
     </div>
 
     <table class="file-table">
-        <thead>
+      <thead>
+        <tr>
+          <th>${isZh ? '文件名' : 'Filename'}</th>
+          <th>${isZh ? '大小' : 'Size'}</th>
+          <th>${isZh ? '存储类型' : 'Storage Type'}</th>
+          <th>${isZh ? '创建时间' : 'Created At'}</th>
+          <th>${isZh ? '分享链接' : 'Share Link'}</th>
+          <th>${isZh ? '操作' : 'Actions'}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${files.map(file => `
           <tr>
-            <th>${isZh ? '文件名' : 'Filename'}</th>
-            <th>${isZh ? '大小' : 'Size'}</th>
-            <th>${isZh ? '存储类型' : 'Storage Type'}</th>
-            <th>${isZh ? '创建时间' : 'Created At'}</th>
-            <th>${isZh ? '操作' : 'Actions'}</th>
+            <td>${file.filename}</td>
+            <td>${formatSize(file.size)}</td>
+            <td>${file.storage_type.toUpperCase()}</td>
+            <td>${new Date(file.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</td>
+            <td>
+              <button onclick="copyLink('${file.id}')">${isZh ? '复制链接' : 'Copy Link'}</button>
+            </td>
+            <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
           </tr>
-        </thead>
-        <tbody>
-          ${files.map(file => `
-            <tr>
-              <td><a href="/file/${file.id}" target="_blank">${file.filename}</a></td>
-              <td>${formatSize(file.size)}</td>
-              <td>${file.storage_type.toUpperCase()}</td>
-              <td>${new Date(file.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</td>
-              <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
 
   <script>
     function formatSize(bytes) {
@@ -354,7 +364,8 @@ export const mainTemplate = (lang = 'en', files = []) => {
           });
 
           if (!response.ok) {
-            throw new Error(response.statusText);
+            const errorText = await response.text();
+            throw new Error(errorText);
           }
 
           const data = await response.json();
@@ -405,6 +416,25 @@ export const mainTemplate = (lang = 'en', files = []) => {
         }
       } catch (error) {
         alert(lang === 'zh' ? '删除失败: ' : 'Failed to delete: ' + error.message);
+      }
+    }
+
+    function copyLink(id) {
+      const link = \`\${window.location.origin}/file/\${id}\`;
+      navigator.clipboard.writeText(link).then(() => {
+        alert(lang === 'zh' ? '链接已复制' : 'Link copied to clipboard');
+      }).catch(err => {
+        alert(lang === 'zh' ? '无法复制链接' : 'Failed to copy link');
+      });
+    }
+
+    function logout() {
+      if (confirm(lang === 'zh' ? '确定要退出登录吗？' : 'Are you sure you want to logout?')) {
+        fetch('/logout', {
+          method: 'POST',
+        }).then(() => {
+          window.location.href = '/auth';
+        });
       }
     }
   </script>
