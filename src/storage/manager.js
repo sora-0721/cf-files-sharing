@@ -17,10 +17,13 @@ class StorageManager {
       filename: file.name,
       size: file.size,
       storage_type: storageType,
+      created_at: new Date().toISOString(),
     };
 
     if (storageType === 'r2') {
       await this.r2Storage.store(id, file);
+      // 存储元数据到 D1
+      await this.d1Storage.storeMetadata(metadata);
     } else {
       await this.d1Storage.store(id, file);
     }
@@ -29,33 +32,53 @@ class StorageManager {
   }
 
   async retrieve(id) {
-    // 尝试从 D1 存储中获取
-    let file = await this.d1Storage.retrieve(id);
-    if (file) return file;
+    // 从 D1 获取元数据
+    const metadata = await this.d1Storage.getMetadata(id);
+    if (!metadata) {
+      return null;
+    }
 
-    // 尝试从 R2 存储中获取
-    file = await this.r2Storage.retrieve(id);
-    if (file) return file;
+    let file = null;
+    if (metadata.storage_type === 'd1') {
+      file = await this.d1Storage.retrieve(id);
+    } else if (metadata.storage_type === 'r2') {
+      file = await this.r2Storage.retrieve(id);
+    }
 
-    return null;
+    if (file) {
+      file.filename = metadata.filename;
+      file.storage_type = metadata.storage_type;
+    }
+
+    return file;
   }
 
   async delete(id) {
-    // 尝试从 D1 存储中删除
-    let success = await this.d1Storage.delete(id);
-    if (success) return true;
+    // 从 D1 获取元数据
+    const metadata = await this.d1Storage.getMetadata(id);
+    if (!metadata) {
+      return false;
+    }
 
-    // 尝试从 R2 存储中删除
-    success = await this.r2Storage.delete(id);
-    if (success) return true;
+    let success = false;
+    if (metadata.storage_type === 'd1') {
+      success = await this.d1Storage.delete(id);
+    } else if (metadata.storage_type === 'r2') {
+      success = await this.r2Storage.delete(id);
+    }
 
-    return false;
+    if (success) {
+      // 删除 D1 中的元数据
+      await this.d1Storage.deleteMetadata(id);
+    }
+
+    return success;
   }
 
   async list() {
-    const d1Files = await this.d1Storage.list();
-    const r2Files = await this.r2Storage.list();
-    return [...d1Files, ...r2Files];
+    // 仅从 D1 获取文件列表
+    const files = await this.d1Storage.list();
+    return files;
   }
 }
 
