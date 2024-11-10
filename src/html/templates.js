@@ -8,7 +8,7 @@ export const loginTemplate = (lang = 'en', message = '') => {
 <head>
   <meta charset="UTF-8">
   <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
-<style>
+  <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -43,6 +43,7 @@ export const loginTemplate = (lang = 'en', message = '') => {
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
       background: #333;
@@ -70,7 +71,6 @@ export const loginTemplate = (lang = 'en', message = '') => {
 export const mainTemplate = (lang = 'en', files = []) => {
   const isZh = lang === 'zh';
 
-  // 在模板函数内部定义 formatSize 函数
   function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
@@ -83,7 +83,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
 <head>
   <meta charset="UTF-8">
   <title>${isZh ? '文件分享' : 'File Share'}</title>
- <style>
+  <style>
     /* CSS 样式 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -109,6 +109,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
       text-align: center;
       margin-bottom: 1rem;
       position: relative;
+      transition: background 0.3s;
     }
     .drag-drop.hover {
       background: #f9f9f9;
@@ -127,15 +128,20 @@ export const mainTemplate = (lang = 'en', files = []) => {
       list-style: none;
       margin-bottom: 0.5rem;
     }
-    .drag-drop .upload-btn {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-    }
+    .drag-drop .upload-btn,
     .drag-drop .open-btn {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
+      padding: 10px 20px;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 0.5rem;
+    }
+    .drag-drop .upload-btn:hover,
+    .drag-drop .open-btn:hover {
+      background: #333;
     }
     .storage-options {
       margin: 1rem 0;
@@ -165,9 +171,10 @@ export const mainTemplate = (lang = 'en', files = []) => {
       background: #000;
       color: #fff;
       border: none;
-      padding: 10px 20px;
+      padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
       background: #333;
@@ -196,6 +203,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
       padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     .delete-btn:hover {
       background: darkred;
@@ -218,6 +226,45 @@ export const mainTemplate = (lang = 'en', files = []) => {
       position: absolute;
       top: 10px;
       right: 10px;
+    }
+    /* Notification bar */
+    #notificationBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #000;
+      color: #fff;
+      padding: 1rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+    }
+    #notificationBar .message {
+      flex-grow: 1;
+    }
+    #notificationBar .close-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    /* 响应式设计 */
+    @media (max-width: 600px) {
+      .upload-form {
+        padding: 1rem;
+      }
+      .drag-drop {
+        padding: 1rem;
+      }
+      .file-table th, .file-table td {
+        padding: 6px;
+      }
+      .logout-btn {
+        padding: 5px 10px;
+      }
     }
   </style>
 </head>
@@ -263,20 +310,35 @@ export const mainTemplate = (lang = 'en', files = []) => {
         </tr>
       </thead>
       <tbody>
-        ${files.map(file => `
+        ${files
+          .map(
+            (file) => `
           <tr>
             <td>${file.filename}</td>
             <td>${formatSize(file.size)}</td>
             <td>${file.storage_type.toUpperCase()}</td>
-            <td>${new Date(file.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</td>
+            <td>${new Date(file.created_at).toLocaleString(
+              lang === 'zh' ? 'zh-CN' : 'en-US'
+            )}</td>
             <td>
-              <button onclick="copyLink('${file.id}')">${isZh ? '复制链接' : 'Copy Link'}</button>
+              <button onclick="copyLink('${file.id}', this)">${
+              isZh ? '复制链接' : 'Copy Link'
+            }</button>
             </td>
-            <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
+            <td><button class="delete-btn" onclick="confirmDelete(this, '${
+              file.id
+            }')">${isZh ? '删除' : 'Delete'}</button></td>
           </tr>
-        `).join('')}
+        `
+          )
+          .join('')}
       </tbody>
     </table>
+  </div>
+
+  <div id="notificationBar">
+    <span class="message"></span>
+    <button class="close-btn" onclick="hideNotification()">×</button>
   </div>
 
   <script>
@@ -296,6 +358,8 @@ export const mainTemplate = (lang = 'en', files = []) => {
     const uploadResult = document.getElementById('uploadResult');
     const uploadingIndicator = document.getElementById('uploadingIndicator');
     const storageTypeSelect = document.getElementById('storageType');
+    const notificationBar = document.getElementById('notificationBar');
+    const notificationMessage = notificationBar.querySelector('.message');
     const lang = navigator.language.includes('zh') ? 'zh' : 'en';
 
     dragDropArea.addEventListener('dragover', (e) => {
@@ -327,10 +391,14 @@ export const mainTemplate = (lang = 'en', files = []) => {
         li.textContent = file.name + ' (' + formatSize(file.size) + ')';
         fileList.appendChild(li);
       }
-      const estimatedCost = ((totalSize / (1024 * 1024 * 1024)) * 0.02).toFixed(2); // 假设每GB 0.02美元
-      feeWarning.textContent = lang === 'zh'
-        ? \`预计费用：\$\${estimatedCost}\`
-        : \`Estimated cost: \$\${estimatedCost}\`;
+      const estimatedCost = (
+        (totalSize / (1024 * 1024 * 1024)) *
+        0.02
+      ).toFixed(2); // 假设每GB 0.02美元
+      feeWarning.textContent =
+        lang === 'zh'
+          ? \`预计费用：\$\${estimatedCost}\`
+          : \`Estimated cost: \$\${estimatedCost}\`;
     }
 
     async function uploadFiles() {
@@ -349,7 +417,10 @@ export const mainTemplate = (lang = 'en', files = []) => {
 
         // 保留对存储介质的选择
         let currentStorageType = storageType;
-        if (file.size > 25 * 1024 * 1024 && currentStorageType !== 'r2') {
+        if (
+          file.size > 25 * 1024 * 1024 &&
+          currentStorageType !== 'r2'
+        ) {
           currentStorageType = 'r2';
         }
 
@@ -373,12 +444,26 @@ export const mainTemplate = (lang = 'en', files = []) => {
 
           uploadResult.style.display = 'block';
           uploadResult.innerHTML += \`
-            <p>\${lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:'} <a href="\${shareUrl}" target="_blank">\${data.filename}</a></p>
+            <p>\${
+              lang === 'zh'
+                ? '文件上传成功：'
+                : 'File uploaded successfully:'
+            } <a href="\${shareUrl}" target="_blank">\${data.filename}</a></p>
           \`;
 
+          showNotification(
+            lang === 'zh' ? '文件上传成功' : 'File uploaded successfully'
+          );
         } catch (error) {
           uploadResult.style.display = 'block';
-          uploadResult.innerHTML += (lang === 'zh' ? '上传失败: ' : 'Upload failed: ') + error.message + '<br>';
+          uploadResult.innerHTML +=
+            (lang === 'zh' ? '上传失败: ' : 'Upload failed: ') +
+            error.message +
+            '<br>';
+          showNotification(
+            (lang === 'zh' ? '上传失败: ' : 'Upload failed: ') +
+              error.message
+          );
         }
 
         progressBar.style.width = \`\${((i + 1) / files.length) * 100}%\`;
@@ -392,11 +477,31 @@ export const mainTemplate = (lang = 'en', files = []) => {
       }, 2000);
     }
 
-    async function deleteFile(id) {
-      if (!confirm(lang === 'zh' ? '确定删除此文件？' : 'Are you sure you want to delete this file?')) {
-        return;
-      }
+    function showNotification(message) {
+      notificationMessage.textContent = message;
+      notificationBar.style.display = 'flex';
+    }
 
+    function hideNotification() {
+      notificationBar.style.display = 'none';
+    }
+
+    function confirmDelete(button, id) {
+      if (button.dataset.confirmed) {
+        // 执行删除
+        deleteFile(id);
+      } else {
+        button.textContent =
+          lang === 'zh' ? '确认删除' : 'Confirm Delete';
+        button.dataset.confirmed = true;
+        setTimeout(() => {
+          button.textContent = lang === 'zh' ? '删除' : 'Delete';
+          delete button.dataset.confirmed;
+        }, 3000); // 3 秒后重置按钮
+      }
+    }
+
+    async function deleteFile(id) {
       const formData = new FormData();
       formData.append('id', id);
 
@@ -409,27 +514,50 @@ export const mainTemplate = (lang = 'en', files = []) => {
         const result = await response.json();
 
         if (result.success) {
-          // 移除文件行
+          // 刷新页面
           window.location.reload();
         } else {
-          alert(lang === 'zh' ? '删除失败' : 'Failed to delete');
+          showNotification(
+            lang === 'zh' ? '删除失败' : 'Failed to delete'
+          );
         }
       } catch (error) {
-        alert(lang === 'zh' ? '删除失败: ' : 'Failed to delete: ' + error.message);
+        showNotification(
+          (lang === 'zh' ? '删除失败: ' : 'Failed to delete: ') +
+            error.message
+        );
       }
     }
 
-    function copyLink(id) {
+    function copyLink(id, button) {
       const link = \`\${window.location.origin}/file/\${id}\`;
-      navigator.clipboard.writeText(link).then(() => {
-        alert(lang === 'zh' ? '链接已复制' : 'Link copied to clipboard');
-      }).catch(err => {
-        alert(lang === 'zh' ? '无法复制链接' : 'Failed to copy link');
-      });
+      navigator.clipboard
+        .writeText(link)
+        .then(() => {
+          showNotification(
+            lang === 'zh' ? '链接已复制' : 'Link copied to clipboard'
+          );
+          button.textContent = lang === 'zh' ? '已复制' : 'Copied';
+          setTimeout(() => {
+            button.textContent =
+              lang === 'zh' ? '复制链接' : 'Copy Link';
+          }, 2000);
+        })
+        .catch((err) => {
+          showNotification(
+            lang === 'zh' ? '无法复制链接' : 'Failed to copy link'
+          );
+        });
     }
 
     function logout() {
-      if (confirm(lang === 'zh' ? '确定要退出登录吗？' : 'Are you sure you want to logout?')) {
+      if (
+        confirm(
+          lang === 'zh'
+            ? '确定要退出登录吗？'
+            : 'Are you sure you want to logout?'
+        )
+      ) {
         fetch('/logout', {
           method: 'POST',
         }).then(() => {
