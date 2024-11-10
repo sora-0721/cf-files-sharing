@@ -12,9 +12,12 @@ class D1Storage {
       // 将 ArrayBuffer 转换为 Base64 字符串
       const base64String = this.arrayBufferToBase64(arrayBuffer);
 
-      await this.db.prepare(
-        'INSERT INTO files (id, filename, size, storage_type, created_at, content) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)'
-      ).bind(id, file.name, file.size, 'd1', base64String).run();
+      await this.db
+        .prepare(
+          'INSERT INTO files (id, filename, size, storage_type, created_at, content) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)'
+        )
+        .bind(id, file.name, file.size, 'd1', base64String)
+        .run();
     } catch (error) {
       console.error('D1 store error:', error);
       throw error;
@@ -24,9 +27,18 @@ class D1Storage {
   // 存储元数据（用于存储在 R2 中的文件）
   async storeMetadata(metadata) {
     try {
-      await this.db.prepare(
-        'INSERT INTO files (id, filename, size, storage_type, created_at) VALUES (?, ?, ?, ?, ?)'
-      ).bind(metadata.id, metadata.filename, metadata.size, metadata.storage_type, metadata.created_at).run();
+      await this.db
+        .prepare(
+          'INSERT INTO files (id, filename, size, storage_type, created_at) VALUES (?, ?, ?, ?, ?)'
+        )
+        .bind(
+          metadata.id,
+          metadata.filename,
+          metadata.size,
+          metadata.storage_type,
+          metadata.created_at
+        )
+        .run();
     } catch (error) {
       console.error('D1 storeMetadata error:', error);
       throw error;
@@ -36,9 +48,10 @@ class D1Storage {
   // 获取文件内容和元数据
   async retrieve(id) {
     try {
-      const result = await this.db.prepare(
-        'SELECT * FROM files WHERE id = ?'
-      ).bind(id).first();
+      const result = await this.db
+        .prepare('SELECT * FROM files WHERE id = ?')
+        .bind(id)
+        .first();
 
       if (result && result.content) {
         // 将 Base64 字符串解码回 ArrayBuffer
@@ -47,7 +60,7 @@ class D1Storage {
         return {
           stream: new Response(arrayBuffer).body,
           filename: result.filename,
-          storage_type: 'd1'
+          storage_type: 'd1',
         };
       }
       return null;
@@ -60,9 +73,12 @@ class D1Storage {
   // 获取元数据
   async getMetadata(id) {
     try {
-      const result = await this.db.prepare(
-        'SELECT id, filename, size, storage_type, created_at FROM files WHERE id = ?'
-      ).bind(id).first();
+      const result = await this.db
+        .prepare(
+          'SELECT id, filename, size, storage_type, created_at FROM files WHERE id = ?'
+        )
+        .bind(id)
+        .first();
       return result;
     } catch (error) {
       console.error('D1 getMetadata error:', error);
@@ -73,9 +89,10 @@ class D1Storage {
   // 删除文件内容和元数据
   async delete(id) {
     try {
-      const result = await this.db.prepare(
-        'DELETE FROM files WHERE id = ?'
-      ).bind(id).run();
+      const result = await this.db
+        .prepare('DELETE FROM files WHERE id = ?')
+        .bind(id)
+        .run();
       return result.success;
     } catch (error) {
       console.error('D1 delete error:', error);
@@ -83,18 +100,28 @@ class D1Storage {
     }
   }
 
-  // 删除元数据
+  // 删除元数据（用于 R2 存储的文件）
   async deleteMetadata(id) {
-    // 对于 D1 存储，delete 方法已经删除了元数据，此处可不做操作
-    return true;
+    try {
+      const result = await this.db
+        .prepare('DELETE FROM files WHERE id = ?')
+        .bind(id)
+        .run();
+      return result.success;
+    } catch (error) {
+      console.error('D1 deleteMetadata error:', error);
+      return false;
+    }
   }
 
   // 列出所有文件
   async list() {
     try {
-      const results = await this.db.prepare(
-        'SELECT id, filename, size, storage_type, created_at FROM files ORDER BY created_at DESC'
-      ).all();
+      const results = await this.db
+        .prepare(
+          'SELECT id, filename, size, storage_type, created_at FROM files ORDER BY created_at DESC'
+        )
+        .all();
       return results.results || [];
     } catch (error) {
       console.error('D1 list error:', error);
