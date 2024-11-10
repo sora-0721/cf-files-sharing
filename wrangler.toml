@@ -3,7 +3,7 @@ main = "src/index.js"
 compatibility_date = "2024-01-01"
 
 [vars]
-AUTH_PASSWORD = ""  # Will be set via environment variables
+AUTH_PASSWORD = "AUTH_PASSWORD"  # Will be set via environment variables
 
 [[r2_buckets]]
 binding = "FILE_BUCKET"
