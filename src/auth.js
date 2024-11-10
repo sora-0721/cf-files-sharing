@@ -26,6 +26,10 @@ class Auth {
     return `${this.cookieName}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${this.cookieExpiry}`;
   }
 
+  static createExpiredCookie() {
+    return `${this.cookieName}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+  }
+
   static async verifyAuth(request, env) {
     const cookieHeader = request.headers.get('Cookie');
     if (!cookieHeader) return false;
