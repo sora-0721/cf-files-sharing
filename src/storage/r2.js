@@ -6,13 +6,7 @@ class R2Storage {
     }
 
     async store(id, file) {
-        await this.bucket.put(id, file.stream(), {
-            customMetadata: {
-                filename: file.name,
-                size: file.size.toString(),
-                created_at: new Date().toISOString(),
-            }
-        });
+        await this.bucket.put(id, file.stream());
     }
 
     async retrieve(id) {
@@ -20,8 +14,7 @@ class R2Storage {
         if (object) {
             return {
                 stream: object.body,
-                filename: object.customMetadata?.filename || 'unknown',
-                storage_type: 'r2'
+                // 文件名和存储类型将在 StorageManager 中添加
             };
         }
         return null;
@@ -37,24 +30,7 @@ class R2Storage {
         }
     }
 
-    async list() {
-        try {
-            const objects = await this.bucket.list();
-            const files = objects.objects.map(obj => {
-                return {
-                    id: obj.key,
-                    filename: obj.customMetadata?.filename || 'unknown',
-                    size: parseInt(obj.customMetadata?.size) || 0,
-                    storage_type: 'r2',
-                    created_at: obj.customMetadata?.created_at || obj.uploaded
-                };
-            });
-            return files;
-        } catch (error) {
-            console.error('R2 list error:', error);
-            return [];
-        }
-    }
+    // 不再需要 list 方法，因为文件列表从 D1 获取
 }
 
 export { R2Storage };
