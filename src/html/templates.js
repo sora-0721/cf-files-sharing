@@ -8,7 +8,7 @@ export const loginTemplate = (lang = 'en', message = '') => {
 <head>
   <meta charset="UTF-8">
   <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
-  <style>
+<style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -69,13 +69,22 @@ export const loginTemplate = (lang = 'en', message = '') => {
 
 export const mainTemplate = (lang = 'en', files = []) => {
   const isZh = lang === 'zh';
+
+  // 在模板函数内部定义 formatSize 函数
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+  }
+
   return `
 <!DOCTYPE html>
 <html lang="${isZh ? 'zh' : 'en'}">
 <head>
   <meta charset="UTF-8">
   <title>${isZh ? '文件分享' : 'File Share'}</title>
-  <style>
+ <style>
     /* CSS 样式 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -253,7 +262,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
             <td><a href="/file/${file.id}" target="_blank">${file.filename}</a></td>
             <td>${formatSize(file.size)}</td>
             <td>${file.storage_type.toUpperCase()}</td>
-            <td>${new Date(file.created_at).toLocaleString(lang)}</td>
+            <td>${new Date(file.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</td>
             <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
           </tr>
         `).join('')}
