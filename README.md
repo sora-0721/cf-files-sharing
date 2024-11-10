@@ -83,13 +83,17 @@ Access the sharing link → Parse the file ID → Determine storage location →
    database_id = "your-database-id" # obtained from the previous step
    ```
 
-### Step 3: Deploy
+### Step 3: Initialize the Database
 
-Deploy to Cloudflare Workers:
+Run the database migration:
 
 ```bash
-wrangler deploy
+wrangler d1 execute file-share --file=./migrations/init.sql --remote
 ```
+
+> [!NOTE]
+> Ensure that you replace `"your-database-id"` in the `wrangler.toml` file with the actual database ID obtained from the previous steps.
+> Also, remember to include the `--remote` flag when running database migrations to apply them to the remote D1 database.
 
 ### Step 4: Configure Environment Variables
 
@@ -101,17 +105,13 @@ wrangler deploy
 
    When prompted, enter the password you want to set.
 
-### Step 5: Initialize the Database
+### Step 5: Deploy
 
-Run the database migration:
+Deploy to Cloudflare Workers:
 
 ```bash
-wrangler d1 execute file-share --file=./migrations/init.sql --remote
+wrangler deploy
 ```
-
-> [!NOTE]
-> Ensure that you replace `"your-database-id"` in the `wrangler.toml` file with the actual database ID obtained from the previous steps.
-> Also, remember to include the `--remote` flag when running database migrations to apply them to the remote D1 database.
 
 ## Usage Guide
 
