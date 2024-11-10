@@ -1,6 +1,6 @@
 # CloudFlare File Share
 
-English｜简体中文
+[English](https://github.com/joyance-professional/cf-files-sharing/blob/main/README.md)｜[简体中文](https://github.com/joyance-professional/cf-files-sharing/blob/main/README-cn.md)
 
 A simple file sharing tool running on Cloudflare Workers, supporting R2 and D1 dual storage solutions.
 
@@ -18,14 +18,14 @@ A simple file sharing tool running on Cloudflare Workers, supporting R2 and D1 d
 ```
 Login process:
 User access → Check cookies → No cookies → Display login page → Verify password → Set cookies → Enter home page
-                      ↑
-              Have cookies → Verify cookies → Enter home page
+                      ↑
+              Have cookies → Verify cookies → Enter home page
 
 Upload process:
 Select file → Check file size → >25MB → Use R2 storage
-                              → ≤25MB → Select storage method → R2 or D1
-              ↓
-    Generate unique ID → Store file → Return the sharing link
+                              → ≤25MB → Select storage method → R2 or D1
+              ↓
+    Generate unique ID → Store file → Return the sharing link
 
 Download process:
 Access the sharing link → Parse the file ID → Determine storage location → Retrieve file → Return file content
@@ -35,53 +35,53 @@ Access the sharing link → Parse the file ID → Determine storage location →
 
 ### Prerequisites
 
-- Node.js (16.x or higher)
-- Cloudflare account
-- Wrangler CLI
+- [Node.js](https://nodejs.org/) (16.x or higher)
+- [Cloudflare account](https://dash.cloudflare.com/sign-up)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 
 ### Step 1: Configure the Environment
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/joyance-professional/cf-files-sharing
-   cd cf-files-sharing
-   ```
+   ```bash
+   git clone https://github.com/joyance-professional/cf-files-sharing
+   cd cf-files-sharing
+   ```
 
 2. Install dependencies:
 
-   ```bash
-   npm install
-   ```
+   ```bash
+   npm install
+   ```
 
 3. Log in to Cloudflare:
 
-   ```bash
-   wrangler login
-   ```
+   ```bash
+   wrangler login
+   ```
 
 ### Step 2: Create Necessary Cloudflare Resources
 
 1. Create the R2 bucket:
 
-   ```bash
-   wrangler r2 bucket create file-share
-   ```
+   ```bash
+   wrangler r2 bucket create file-share
+   ```
 
 2. Create the D1 database:
 
-   ```bash
-   wrangler d1 create file-share
-   ```
+   ```bash
+   wrangler d1 create file-share
+   ```
 
-3. Update the database ID in the wrangler.toml file:
+3. Update the database ID in the `wrangler.toml` file:
 
-   ```toml
-   [[d1_databases]]
-   binding = "DB"
-   database_name = "file-share"
-   database_id = "your-database-id" # obtained from the previous step
-   ```
+   ```toml
+   [[d1_databases]]
+   binding = "DB"
+   database_name = "file-share"
+   database_id = "your-database-id" # obtained from the previous step
+   ```
 
 ### Step 3: Deploy
 
@@ -95,11 +95,11 @@ wrangler deploy
 
 1. Set the authentication password:
 
-   ```bash
-   wrangler secret put AUTH_PASSWORD
-   ```
+   ```bash
+   wrangler secret put AUTH_PASSWORD
+   ```
 
-   When prompted, enter the password you want to set.
+   When prompted, enter the password you want to set.
 
 ### Step 5: Initialize the Database
 
@@ -109,12 +109,16 @@ Run the database migration:
 wrangler d1 execute file-share --file=./migrations/init.sql --remote
 ```
 
+> [!NOTE]
+> Ensure that you replace `"your-database-id"` in the `wrangler.toml` file with the actual database ID obtained from the previous steps.
+> Also, remember to include the `--remote` flag when running database migrations to apply them to the remote D1 database.
+
 ## Usage Guide
 
 ### Admin Access
 
 1. Access your Workers domain.
-2. Enter the set AUTH_PASSWORD to log in.
+2. Enter the set `AUTH_PASSWORD` to log in.
 3. The login status will remain for 30 days.
 
 ### File Upload
@@ -126,7 +130,7 @@ wrangler d1 execute file-share --file=./migrations/init.sql --remote
 
 ### File Sharing
 
-- Share link format: https://your-worker.workers.dev/file/[FILE_ID]
+- Share link format: `https://your-worker.workers.dev/file/[FILE_ID]`
 - Anyone can download the file directly through the link.
 - The link is permanently valid.
 
@@ -134,19 +138,19 @@ wrangler d1 execute file-share --file=./migrations/init.sql --remote
 
 ### Storage Mechanism
 
-- R2 Storage: Suitable for large files, no size limit.
-- D1 Storage: Suitable for small files (<25MB), stored in SQLite database.
+- **R2 Storage**: Suitable for large files, no size limit.
+- **D1 Storage**: Suitable for small files (<25MB), stored in SQLite database.
 
 ### Database Structure
 
 ```sql
 CREATE TABLE files (
-    id TEXT PRIMARY KEY,
-    filename TEXT NOT NULL,
-    size INTEGER NOT NULL,
-    storage_type TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    content BLOB NULL
+    id TEXT PRIMARY KEY,
+    filename TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    storage_type TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    content BLOB NULL
 );
 ```
 
@@ -160,11 +164,11 @@ CREATE TABLE files (
 
 ### Environment Variables
 
-| Variable Name | Description                 | Required |
+| Variable Name | Description                 | Required |
 |---------------|-----------------------------|----------|
-| AUTH_PASSWORD | Admin interface login password | Yes      |
+| AUTH_PASSWORD | Admin interface login password | Yes      |
 
-### wrangler.toml Configuration
+### `wrangler.toml` Configuration
 
 ```toml
 name = "file-share-worker"
@@ -186,31 +190,31 @@ database_id = "your-database-id"
 
 1. After cloning the repository, run:
 
-   ```bash
-   wrangler dev
-   ```
+   ```bash
+   wrangler dev
+   ```
 
-2. Visit http://localhost:8787 for testing.
+2. Visit `http://localhost:8787` for testing.
 
 ### Code Structure
 
 ```
 cf-files-sharing/
 ├── src/
-│   ├── index.js        # Main entry file
-│   ├── auth.js         # Authentication logic
-│   ├── storage/
-│   │   ├── r2.js       # R2 storage handling
-│   │   ├── d1.js       # D1 storage handling
-│   │   └── manager.js  # Storage manager
-│   ├── utils/
-│   │   ├── response.js # Response utilities
-│   │   └── id.js       # File ID generator
-│   └── html/
-│       └── templates.js # HTML templates
-├── wrangler.toml       # Cloudflare configuration
-└── migrations/         # D1 database migrations
-    └── init.sql
+│   ├── index.js        # Main entry file
+│   ├── auth.js         # Authentication logic
+│   ├── storage/
+│   │   ├── r2.js       # R2 storage handling
+│   │   ├── d1.js       # D1 storage handling
+│   │   └── manager.js  # Storage manager
+│   ├── utils/
+│   │   ├── response.js # Response utilities
+│   │   └── id.js       # File ID generator
+│   └── html/
+│       └── templates.js # HTML templates
+├── wrangler.toml       # Cloudflare configuration
+└── migrations/         # D1 database migrations
+    └── init.sql
 ```
 
 ## Contribution Guide
@@ -225,8 +229,8 @@ cf-files-sharing/
 
 - Cloudflare Workers Platform
 - Claude-3.5-Sonnet AI
-- Chat-GPT-o1-preview | Chat History
+- Chat-GPT-o1-preview | [Chat History](https://chatgpt.com/share/672f2565-470c-8012-a222-904ca69a4692)
 
 ## Feedback
 
-If you find any issues or have suggestions for improvements, please create an issue
+If you find any issues or have suggestions for improvements, please create an [issue](https://github.com/joyance-professional/cf-files-sharing/issues).
