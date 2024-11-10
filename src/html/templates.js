@@ -1,6 +1,6 @@
 // src/html/templates.js
 
-export const loginTemplate = (lang = 'en', message = '') => {
+export const loginTemplate = (lang = 'zh', message = '') => {
   const isZh = lang === 'zh';
   return `
 <!DOCTYPE html>
@@ -16,52 +16,42 @@ export const loginTemplate = (lang = 'en', message = '') => {
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-      animation: backgroundAnimation 10s infinite alternate;
-    }
-    @keyframes backgroundAnimation {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+      background: #fff;
+      color: #000;
     }
     .login-form {
-      background: rgba(255, 255, 255, 0.85);
+      background: #fff;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      border: 1px solid #ccc;
       width: 100%;
       max-width: 400px;
       margin: 1rem;
-      backdrop-filter: blur(10px);
-      animation: formFadeIn 0.8s ease-out;
-    }
-    @keyframes formFadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     input {
       width: 100%;
       padding: 12px;
       margin: 12px 0;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
       box-sizing: border-box;
       font-size: 16px;
+      color: #000;
+      background: #fff;
     }
     button {
       width: 100%;
       padding: 12px;
-      background: #3498db;
+      background: #000;
       color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
-      transition: background 0.3s, transform 0.2s;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #2980b9;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background: #333;
     }
     .error-message {
       color: red;
@@ -71,7 +61,7 @@ export const loginTemplate = (lang = 'en', message = '') => {
     h2 {
       text-align: center;
       margin-bottom: 1.5rem;
-      color: #333;
+      color: #000;
     }
   </style>
 </head>
@@ -89,7 +79,7 @@ export const loginTemplate = (lang = 'en', message = '') => {
 `;
 };
 
-export const mainTemplate = (lang = 'en', files = []) => {
+export const mainTemplate = (lang = 'zh', files = []) => {
   const isZh = lang === 'zh';
 
   function formatSize(bytes) {
@@ -105,40 +95,28 @@ export const mainTemplate = (lang = 'en', files = []) => {
   <meta charset="UTF-8">
   <title>${isZh ? '文件分享' : 'File Share'}</title>
   <style>
-    /* CSS 样式 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 20px;
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-      animation: backgroundAnimation 10s infinite alternate;
-      color: #333;
-    }
-    @keyframes backgroundAnimation {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+      background: #fff;
+      color: #000;
     }
     .container {
-      max-width: 1000px;
+      max-width: 800px;
       margin: 0 auto;
-      animation: containerFadeIn 1s ease-out;
-    }
-    @keyframes containerFadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     .upload-form {
-      background: rgba(255, 255, 255, 0.85);
+      background: #fff;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      border: 1px solid #ccc;
       position: relative;
-      backdrop-filter: blur(10px);
-      margin-bottom: 2rem;
     }
     .upload-form h2 {
       text-align: center;
       margin-bottom: 1.5rem;
+      color: #000;
     }
     .drag-drop {
       border: 2px dashed #ccc;
@@ -146,13 +124,12 @@ export const mainTemplate = (lang = 'en', files = []) => {
       text-align: center;
       margin-bottom: 1rem;
       position: relative;
-      transition: background 0.3s, border-color 0.3s;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.5);
+      transition: background 0.3s;
+      border-radius: 8px;
+      background: #fff;
     }
     .drag-drop.hover {
-      background: rgba(255, 255, 255, 0.8);
-      border-color: #3498db;
+      background: #f9f9f9;
     }
     .drag-drop input[type="file"] {
       display: none;
@@ -160,7 +137,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
     .drag-drop p {
       margin: 0;
       font-size: 18px;
-      color: #666;
+      color: #000;
     }
     .drag-drop .file-list {
       margin-top: 1rem;
@@ -171,24 +148,22 @@ export const mainTemplate = (lang = 'en', files = []) => {
     .drag-drop .file-list li {
       list-style: none;
       margin-bottom: 0.5rem;
-      color: #333;
+      color: #000;
     }
     .drag-drop .upload-btn,
     .drag-drop .open-btn {
-      padding: 12px 24px;
-      background: #3498db;
+      padding: 10px 20px;
+      background: #000;
       color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
+      transition: background 0.3s;
       margin: 0.5rem;
     }
     .drag-drop .upload-btn:hover,
     .drag-drop .open-btn:hover {
-      background: #2980b9;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background: #333;
     }
     .storage-options {
       margin: 1rem 0;
@@ -205,83 +180,74 @@ export const mainTemplate = (lang = 'en', files = []) => {
     }
     .progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, #3498db, #8e44ad);
+      background: #000;
       width: 0%;
       transition: width 0.3s;
     }
     .result {
       margin-top: 1rem;
       padding: 1rem;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 6px;
+      background: #f8f8f8;
+      border-radius: 4px;
       display: none;
-      animation: resultFadeIn 0.5s ease-out;
-    }
-    @keyframes resultFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
     button {
-      background: #3498db;
+      background: #000;
       color: #fff;
       border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #2980b9;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background: #333;
     }
     a {
-      color: #3498db;
-      text-decoration: none;
+      color: #000;
+      text-decoration: underline;
       transition: color 0.3s;
     }
     a:hover {
-      color: #2980b9;
+      color: #333;
     }
     .file-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 2rem;
-      background: rgba(255, 255, 255, 0.85);
-      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
     .file-table th, .file-table td {
       border-bottom: 1px solid #ddd;
       padding: 12px;
       text-align: left;
-      color: #333;
+      color: #000;
     }
     .file-table th {
       background: #f9f9f9;
-      color: #555;
+      color: #000;
     }
     .file-table tr:last-child td {
       border-bottom: none;
     }
     .delete-btn {
-      background: #e74c3c;
+      background: #000;
       color: #fff;
       border: none;
       padding: 6px 12px;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
+      transition: background 0.3s;
     }
     .delete-btn:hover {
-      background: #c0392b;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background: red;
     }
     .fee-warning {
       margin-top: 1rem;
-      color: #888;
+      color: #666;
       font-size: 0.9rem;
       text-align: center;
     }
@@ -299,16 +265,16 @@ export const mainTemplate = (lang = 'en', files = []) => {
       top: 10px;
       right: 10px;
       background: transparent;
-      color: #333;
+      color: #000;
       font-size: 16px;
       border: none;
       cursor: pointer;
       transition: color 0.3s;
     }
     .logout-btn:hover {
-      color: #e74c3c;
+      color: red;
     }
-    /* Notification bar */
+    /* 通知栏样式 */
     #notificationBar {
       position: fixed;
       bottom: -100px;
@@ -316,15 +282,14 @@ export const mainTemplate = (lang = 'en', files = []) => {
       transform: translateX(-50%);
       width: 90%;
       max-width: 800px;
-      background: #2ecc71;
+      background: #000;
       color: #fff;
       padding: 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       z-index: 1000;
-      border-radius: 6px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      border-radius: 4px;
       transition: bottom 0.5s ease-in-out;
     }
     #notificationBar.show {
@@ -340,11 +305,6 @@ export const mainTemplate = (lang = 'en', files = []) => {
       color: #fff;
       font-size: 1.5rem;
       cursor: pointer;
-      margin-left: 1rem;
-      transition: transform 0.2s;
-    }
-    #notificationBar .close-btn:hover {
-      transform: rotate(90deg);
     }
     /* 响应式设计 */
     @media (max-width: 600px) {
@@ -577,7 +537,7 @@ export const mainTemplate = (lang = 'en', files = []) => {
     function showNotification(message, type = 'success') {
       notificationMessage.textContent = message;
       notificationBar.style.background =
-        type === 'success' ? '#2ecc71' : '#e74c3c';
+        type === 'success' ? '#000' : 'red';
       notificationBar.classList.add('show');
       setTimeout(() => {
         hideNotification();
@@ -596,11 +556,11 @@ export const mainTemplate = (lang = 'en', files = []) => {
         button.textContent =
           lang === 'zh' ? '确认删除' : 'Confirm Delete';
         button.dataset.confirmed = true;
-        button.style.background = '#f39c12';
+        button.style.background = 'red';
         setTimeout(() => {
           button.textContent = lang === 'zh' ? '删除' : 'Delete';
           delete button.dataset.confirmed;
-          button.style.background = '#e74c3c';
+          button.style.background = '#000';
         }, 3000); // 3 秒后重置按钮
       }
     }
@@ -645,11 +605,11 @@ export const mainTemplate = (lang = 'en', files = []) => {
             'success'
           );
           button.textContent = lang === 'zh' ? '已复制' : 'Copied';
-          button.style.background = '#2ecc71';
+          button.style.background = '#333';
           setTimeout(() => {
             button.textContent =
               lang === 'zh' ? '复制链接' : 'Copy Link';
-            button.style.background = '';
+            button.style.background = '#000';
           }, 2000);
         })
         .catch((err) => {
