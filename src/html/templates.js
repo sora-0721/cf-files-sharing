@@ -77,7 +77,6 @@ export const mainTemplate = (lang = 'en', files = []) => {
     if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
     return (bytes / 1073741824).toFixed(2) + ' GB';
   }
-
   return `
 <!DOCTYPE html>
 <html lang="${isZh ? 'zh' : 'en'}">
@@ -247,28 +246,28 @@ export const mainTemplate = (lang = 'en', files = []) => {
     </div>
 
     <table class="file-table">
-      <thead>
-        <tr>
-          <th>${isZh ? '文件名' : 'Filename'}</th>
-          <th>${isZh ? '大小' : 'Size'}</th>
-          <th>${isZh ? '存储类型' : 'Storage Type'}</th>
-          <th>${isZh ? '创建时间' : 'Created At'}</th>
-          <th>${isZh ? '操作' : 'Actions'}</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${files.map(file => `
+        <thead>
           <tr>
-            <td><a href="/file/${file.id}" target="_blank">${file.filename}</a></td>
-            <td>${formatSize(file.size)}</td>
-            <td>${file.storage_type.toUpperCase()}</td>
-            <td>${new Date(file.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</td>
-            <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
+            <th>${isZh ? '文件名' : 'Filename'}</th>
+            <th>${isZh ? '大小' : 'Size'}</th>
+            <th>${isZh ? '存储类型' : 'Storage Type'}</th>
+            <th>${isZh ? '创建时间' : 'Created At'}</th>
+            <th>${isZh ? '操作' : 'Actions'}</th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          ${files.map(file => `
+            <tr>
+              <td><a href="/file/${file.id}" target="_blank">${file.filename}</a></td>
+              <td>${formatSize(file.size)}</td>
+              <td>${file.storage_type.toUpperCase()}</td>
+              <td>${new Date(file.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</td>
+              <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
 
   <script>
     function formatSize(bytes) {
