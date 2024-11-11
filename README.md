@@ -6,6 +6,8 @@ A simple file sharing tool running on Cloudflare Workers, supporting R2 and D1 d
 
 expample web | [view](https://files-ep.joyance.page)
 
+![1.png](https://images.joyance.page/api/rfile/1.png)
+
 ## Features
 
 - 🔐 Password protection, supports cookie-based persistent login (30 days)
