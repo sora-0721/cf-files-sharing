@@ -1,10 +1,14 @@
-CREATE TABLE IF NOT EXISTS files (
+-- init.sql
+
+CREATE TABLE files (
     id TEXT PRIMARY KEY,
     filename TEXT NOT NULL,
+    path TEXT,
     size INTEGER NOT NULL,
     storage_type TEXT NOT NULL,
+    preview_enabled INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    content BLOB NULL
+    content BLOB
 );
 
-CREATE INDEX IF NOT EXISTS idx_created_at ON files(created_at);
+CREATE INDEX idx_created_at ON files(created_at);
