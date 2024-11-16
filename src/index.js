@@ -2,7 +2,7 @@
 
 import { Auth } from './auth';
 import { StorageManager } from './storage/manager';
-import { loginTemplate, mainTemplate } from './html/templates';
+import { loginTemplate, mainTemplate, previewTemplate } from './html/templates';
 import { jsonResponse, htmlResponse, errorResponse } from './utils/response';
 
 export default {
@@ -13,6 +13,23 @@ export default {
     // 获取用户的语言偏好
     const acceptLanguage = request.headers.get('Accept-Language') || 'en';
     const lang = acceptLanguage.includes('zh') ? 'zh' : 'en';
+
+    // 文件预览处理
+    if (url.pathname.startsWith('/preview/')) {
+      const id = url.pathname.split('/')[2];
+      const file = await storageManager.retrieve(id);
+
+      if (!file) {
+        return errorResponse(lang === 'zh' ? '文件未找到' : 'File not found', 404);
+      }
+
+      if (!file.preview_enabled) {
+        return errorResponse(lang === 'zh' ? '预览不可用' : 'Preview not available', 403);
+      }
+
+      // 返回预览页面
+      return htmlResponse(previewTemplate(lang, file, id));
+    }
 
     // 文件下载处理
     if (url.pathname.startsWith('/file/')) {
@@ -60,27 +77,6 @@ export default {
       return htmlResponse(loginTemplate(lang));
     }
 
-    // 退出登录
-    if (url.pathname === '/logout') {
-      if (request.method === 'POST') {
-        const expiredCookie = Auth.createExpiredCookie();
-        return new Response('', {
-          status: 302,
-          headers: {
-            'Location': '/auth',
-            'Set-Cookie': expiredCookie,
-          },
-        });
-      } else {
-        return new Response('', {
-          status: 405,
-          headers: {
-            'Allow': 'POST',
-          },
-        });
-      }
-    }
-
     // 文件删除处理
     if (url.pathname === '/delete' && request.method === 'POST') {
       const formData = await request.formData();
@@ -106,19 +102,19 @@ export default {
         storageType = 'r2'; // 大于25MB的文件强制使用R2
       }
 
-      try {
-        const metadata = await storageManager.store(file, storageType);
+      const previewEnabled = formData.get('previewEnabled') === 'true' || formData.get('previewEnabled') === 'on';
+      const path = formData.get('path') || '';
 
-        return jsonResponse({
-          id: metadata.id,
-          filename: metadata.filename,
-          size: metadata.size,
-          storage_type: metadata.storage_type,
-        });
-      } catch (error) {
-        console.error('Upload error:', error);
-        return jsonResponse({ error: error.message }, 500);
-      }
+      const metadata = await storageManager.store(file, storageType, previewEnabled, path);
+
+      return jsonResponse({
+        id: metadata.id,
+        filename: metadata.filename,
+        path: metadata.path,
+        size: metadata.size,
+        storage_type: metadata.storage_type,
+        preview_enabled: metadata.preview_enabled,
+      });
     }
 
     // 主页面
