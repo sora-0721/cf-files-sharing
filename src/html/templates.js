@@ -69,6 +69,21 @@ export const loginTemplate = (lang = 'en', message = '') => {
 
 export const mainTemplate = (lang = 'en', files = []) => {
   const isZh = lang === 'zh';
+
+  // 定义 formatSize 函数
+  const formatSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+  };
+
+  // 预格式化文件大小
+  const formattedFiles = files.map(file => ({
+    ...file,
+    formattedSize: formatSize(file.size)
+  }));
+
   return `
 <!DOCTYPE html>
 <html lang="${isZh ? 'zh' : 'en'}">
@@ -261,14 +276,14 @@ export const mainTemplate = (lang = 'en', files = []) => {
         </tr>
       </thead>
       <tbody>
-        ${files.map(file => `
+        ${formattedFiles.map(file => `
           <tr>
             <td>
               <a href="/file/${file.id}" target="_blank">${file.filename}</a>
               ${file.preview_enabled ? ` | <a href="/preview/${file.id}" target="_blank">${isZh ? '预览' : 'Preview'}</a>` : ''}
             </td>
             <td>${file.path || ''}</td>
-            <td>${formatSize(file.size)}</td>
+            <td>${file.formattedSize}</td>
             <td>${file.storage_type.toUpperCase()}</td>
             <td>${new Date(file.created_at).toLocaleString(lang)}</td>
             <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
@@ -366,8 +381,8 @@ export const mainTemplate = (lang = 'en', files = []) => {
 
       const estimatedCost = ((totalSize / (1024 * 1024 * 1024)) * 0.02).toFixed(2); // 假设每GB 0.02美元
       feeWarning.textContent = lang === 'zh'
-        ? \`预计费用：\$\${estimatedCost}\`
-        : \`Estimated cost: \$\${estimatedCost}\`;
+        ? `预计费用：$${estimatedCost}`
+        : `Estimated cost: $${estimatedCost}`;
     }
 
     async function uploadFiles() {
@@ -408,20 +423,20 @@ export const mainTemplate = (lang = 'en', files = []) => {
           }
 
           const data = await response.json();
-          const shareUrl = \`\${window.location.origin}/file/\${data.id}\`;
+          const shareUrl = `${window.location.origin}/file/${data.id}`;
 
           uploadResult.style.display = 'block';
-          uploadResult.innerHTML += \`
-            <p>\${lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:'} <a href="\${shareUrl}" target="_blank">\${data.filename}</a></p>
-          \`;
+          uploadResult.innerHTML += `
+            <p>${lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:'} <a href="${shareUrl}" target="_blank">${data.filename}</a></p>
+          `;
 
         } catch (error) {
-          errorLog.innerHTML += \`
-            <p>\${lang === 'zh' ? '上传失败：' : 'Upload failed:'} \${file.fullPath || file.name} - \${error.message}</p>
-          \`;
+          errorLog.innerHTML += `
+            <p>${lang === 'zh' ? '上传失败：' : 'Upload failed:'} ${file.fullPath || file.name} - ${error.message}</p>
+          `;
         }
 
-        progressBar.style.width = \`\${((i + 1) / filesToUpload.length) * 100}%\`;
+        progressBar.style.width = `${((i + 1) / filesToUpload.length) * 100}%`;
       }
 
       uploadingIndicator.style.display = 'none';
@@ -499,47 +514,48 @@ export const previewTemplate = (lang = 'en', file, id) => {
   }
 
   return `
-  <!DOCTYPE html>
-  <html lang="${isZh ? 'zh' : 'en'}">
-  <head>
-    <meta charset="UTF-8">
-    <title>${file.filename}</title>
-    <style>
-      body {
-        margin: 0;
-        background: #000;
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
-      .download-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.7);
-        color: #fff;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      .download-btn:hover {
-        background: rgba(0, 0, 0, 0.9);
-      }
-      .content {
-        max-width: 100%;
-        max-height: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <button class="download-btn" onclick="window.location.href='/file/${id}'">${isZh ? '下载' : 'Download'}</button>
-    <div class="content">
-      ${contentHtml}
-    </div>
-  </body>
-  </html>
-  `;
+<!DOCTYPE html>
+<html lang="${isZh ? 'zh' : 'en'}">
+<head>
+  <meta charset="UTF-8">
+  <title>${file.filename}</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+    .download-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .download-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+    .content {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <button class="download-btn" onclick="window.location.href='/file/${id}'">${isZh ? '下载' : 'Download'}</button>
+  <div class="content">
+    ${contentHtml}
+  </div>
+</body>
+</html>
+`;
 };
