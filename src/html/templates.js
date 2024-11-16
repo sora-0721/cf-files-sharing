@@ -1,6 +1,6 @@
 // src/html/templates.js
 
-export const loginTemplate = (lang = 'en', message = '') => {
+export const loginTemplate = (lang = 'zh', message = '') => {
   const isZh = lang === 'zh';
   return `
 <!DOCTYPE html>
@@ -10,39 +10,45 @@ export const loginTemplate = (lang = 'en', message = '') => {
   <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       background: #fff;
+      color: #000;
     }
     .login-form {
       background: #fff;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border: 1px solid #ccc;
       width: 100%;
       max-width: 400px;
       margin: 1rem;
     }
     input {
       width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-      border: 1px solid #ddd;
+      padding: 12px;
+      margin: 12px 0;
+      border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
+      font-size: 16px;
+      color: #000;
+      background: #fff;
     }
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       background: #000;
       color: #fff;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
     }
     button:hover {
       background: #333;
@@ -50,6 +56,12 @@ export const loginTemplate = (lang = 'en', message = '') => {
     .error-message {
       color: red;
       margin-bottom: 1rem;
+      text-align: center;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #000;
     }
   </style>
 </head>
@@ -67,23 +79,15 @@ export const loginTemplate = (lang = 'en', message = '') => {
 `;
 };
 
-export const mainTemplate = (lang = 'en', files = []) => {
+export const mainTemplate = (lang = 'zh', files = []) => {
   const isZh = lang === 'zh';
 
-  // 定义 formatSize 函数
-  const formatSize = (bytes) => {
+  function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
     if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
     return (bytes / 1073741824).toFixed(2) + ' GB';
-  };
-
-  // 预格式化文件大小
-  const formattedFiles = files.map(file => ({
-    ...file,
-    formattedSize: formatSize(file.size)
-  }));
-
+  }
   return `
 <!DOCTYPE html>
 <html lang="${isZh ? 'zh' : 'en'}">
@@ -91,9 +95,8 @@ export const mainTemplate = (lang = 'en', files = []) => {
   <meta charset="UTF-8">
   <title>${isZh ? '文件分享' : 'File Share'}</title>
   <style>
-    /* CSS 样式 */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 20px;
       background: #fff;
@@ -107,8 +110,13 @@ export const mainTemplate = (lang = 'en', files = []) => {
       background: #fff;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border: 1px solid #ccc;
       position: relative;
+    }
+    .upload-form h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #000;
     }
     .drag-drop {
       border: 2px dashed #ccc;
@@ -116,6 +124,9 @@ export const mainTemplate = (lang = 'en', files = []) => {
       text-align: center;
       margin-bottom: 1rem;
       position: relative;
+      transition: background 0.3s;
+      border-radius: 8px;
+      background: #fff;
     }
     .drag-drop.hover {
       background: #f9f9f9;
@@ -125,35 +136,47 @@ export const mainTemplate = (lang = 'en', files = []) => {
     }
     .drag-drop p {
       margin: 0;
+      font-size: 18px;
+      color: #000;
     }
     .drag-drop .file-list {
       margin-top: 1rem;
       text-align: left;
+      max-height: 150px;
+      overflow-y: auto;
     }
     .drag-drop .file-list li {
       list-style: none;
       margin-bottom: 0.5rem;
+      color: #000;
     }
-    .drag-drop .upload-btn {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-    }
+    .drag-drop .upload-btn,
     .drag-drop .open-btn {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
+      padding: 10px 20px;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 0.5rem;
     }
-    .storage-options, .preview-option {
+    .drag-drop .upload-btn:hover,
+    .drag-drop .open-btn:hover {
+      background: #333;
+    }
+    .storage-options {
       margin: 1rem 0;
       text-align: center;
     }
     .progress {
       width: 100%;
-      height: 4px;
+      height: 6px;
       background: #eee;
       margin: 1rem 0;
       display: none;
+      border-radius: 3px;
+      overflow: hidden;
     }
     .progress-bar {
       height: 100%;
@@ -168,18 +191,14 @@ export const mainTemplate = (lang = 'en', files = []) => {
       border-radius: 4px;
       display: none;
     }
-    .error-log {
-      margin-top: 1rem;
-      color: red;
-      font-size: 0.9rem;
-    }
     button {
       background: #000;
       color: #fff;
       border: none;
-      padding: 10px 20px;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
       background: #333;
@@ -187,35 +206,50 @@ export const mainTemplate = (lang = 'en', files = []) => {
     a {
       color: #000;
       text-decoration: underline;
+      transition: color 0.3s;
+    }
+    a:hover {
+      color: #333;
     }
     .file-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 2rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
     }
     .file-table th, .file-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      padding: 12px;
       text-align: left;
+      color: #000;
     }
     .file-table th {
       background: #f9f9f9;
+      color: #000;
+    }
+    .file-table tr:last-child td {
+      border-bottom: none;
     }
     .delete-btn {
-      background: red;
+      background: #000;
       color: #fff;
       border: none;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     .delete-btn:hover {
-      background: darkred;
+      background: red;
     }
     .fee-warning {
       margin-top: 1rem;
-      color: #888;
+      color: #666;
       font-size: 0.9rem;
+      text-align: center;
     }
     .uploading-indicator {
       display: none;
@@ -226,16 +260,78 @@ export const mainTemplate = (lang = 'en', files = []) => {
       width: 50px;
       height: 50px;
     }
+    .logout-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      color: #000;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .logout-btn:hover {
+      color: red;
+    }
+    /* 通知栏样式 */
+    #notificationBar {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      background: #000;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      border-radius: 4px;
+      transition: bottom 0.5s ease-in-out;
+    }
+    #notificationBar.show {
+      bottom: 20px;
+    }
+    #notificationBar .message {
+      flex-grow: 1;
+      font-size: 16px;
+    }
+    #notificationBar .close-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    /* 响应式设计 */
+    @media (max-width: 600px) {
+      .upload-form {
+        padding: 1rem;
+      }
+      .drag-drop {
+        padding: 1rem;
+      }
+      .file-table th, .file-table td {
+        padding: 8px;
+      }
+      .logout-btn {
+        padding: 5px 10px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="logout-btn" onclick="logout()">${isZh ? '退出登录' : 'Logout'}</button>
     <div class="upload-form">
       <h2>${isZh ? '上传文件' : 'Upload File'}</h2>
       <div class="drag-drop" id="dragDropArea">
-        <p>${isZh ? '将文件或文件夹拖拽到此处' : 'Drag and drop files or folders here'}</p>
+        <p>${isZh ? '将文件拖拽到此处' : 'Drag and drop files here'}</p>
         <ul class="file-list" id="fileList"></ul>
-        <input type="file" id="fileInput" multiple webkitdirectory directory>
+        <input type="file" id="fileInput" multiple>
         <button class="open-btn" onclick="document.getElementById('fileInput').click()">${isZh ? '选择文件' : 'Choose Files'}</button>
         <button class="upload-btn" onclick="uploadFiles()">${isZh ? '上传' : 'Upload'}</button>
       </div>
@@ -246,12 +342,6 @@ export const mainTemplate = (lang = 'en', files = []) => {
           <option value="d1">D1 ${isZh ? '数据库' : 'Database'}</option>
         </select>
       </div>
-      <div class="preview-option">
-        <label>
-          <input type="checkbox" id="previewEnabled">
-          ${isZh ? '启用在线预览' : 'Enable Online Preview'}
-        </label>
-      </div>
       <div class="fee-warning" id="feeWarning"></div>
       <div class="progress">
         <div class="progress-bar" id="progressBar"></div>
@@ -261,36 +351,49 @@ export const mainTemplate = (lang = 'en', files = []) => {
         <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwgAAAAAAACH5BAEAAAEALAAAAAAQABAAAAIgjI+pq+D9mDEd0dW1HUFW6XoYAOw==" alt="Uploading">
       </div>
       <div class="result" id="uploadResult"></div>
-      <div class="error-log" id="errorLog"></div>
     </div>
 
     <table class="file-table">
       <thead>
         <tr>
           <th>${isZh ? '文件名' : 'Filename'}</th>
-          <th>${isZh ? '路径' : 'Path'}</th>
           <th>${isZh ? '大小' : 'Size'}</th>
           <th>${isZh ? '存储类型' : 'Storage Type'}</th>
           <th>${isZh ? '创建时间' : 'Created At'}</th>
+          <th>${isZh ? '分享链接' : 'Share Link'}</th>
           <th>${isZh ? '操作' : 'Actions'}</th>
         </tr>
       </thead>
       <tbody>
-        ${formattedFiles.map(file => `
+        ${files
+          .map(
+            (file) => `
           <tr>
-            <td>
-              <a href="/file/${file.id}" target="_blank">${file.filename}</a>
-              ${file.preview_enabled ? ` | <a href="/preview/${file.id}" target="_blank">${isZh ? '预览' : 'Preview'}</a>` : ''}
-            </td>
-            <td>${file.path || ''}</td>
-            <td>${file.formattedSize}</td>
+            <td>${file.filename}</td>
+            <td>${formatSize(file.size)}</td>
             <td>${file.storage_type.toUpperCase()}</td>
-            <td>${new Date(file.created_at).toLocaleString(lang)}</td>
-            <td><button class="delete-btn" onclick="deleteFile('${file.id}')">${isZh ? '删除' : 'Delete'}</button></td>
+            <td>${new Date(file.created_at).toLocaleString(
+              lang === 'zh' ? 'zh-CN' : 'en-US'
+            )}</td>
+            <td>
+              <button onclick="copyLink('${file.id}', this)">${
+              isZh ? '复制链接' : 'Copy Link'
+            }</button>
+            </td>
+            <td><button class="delete-btn" onclick="confirmDelete(this, '${
+              file.id
+            }')">${isZh ? '删除' : 'Delete'}</button></td>
           </tr>
-        `).join('')}
+        `
+          )
+          .join('')}
       </tbody>
     </table>
+  </div>
+
+  <div id="notificationBar">
+    <span class="message"></span>
+    <button class="close-btn" onclick="hideNotification()">×</button>
   </div>
 
   <script>
@@ -310,11 +413,9 @@ export const mainTemplate = (lang = 'en', files = []) => {
     const uploadResult = document.getElementById('uploadResult');
     const uploadingIndicator = document.getElementById('uploadingIndicator');
     const storageTypeSelect = document.getElementById('storageType');
-    const previewEnabledCheckbox = document.getElementById('previewEnabled');
-    const errorLog = document.getElementById('errorLog');
+    const notificationBar = document.getElementById('notificationBar');
+    const notificationMessage = notificationBar.querySelector('.message');
     const lang = navigator.language.includes('zh') ? 'zh' : 'en';
-
-    let filesToUpload = [];
 
     dragDropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -328,89 +429,59 @@ export const mainTemplate = (lang = 'en', files = []) => {
     dragDropArea.addEventListener('drop', (e) => {
       e.preventDefault();
       dragDropArea.classList.remove('hover');
-      handleFiles(e.dataTransfer.items || e.dataTransfer.files);
+      fileInput.files = e.dataTransfer.files;
+      updateFileList();
     });
 
-    fileInput.addEventListener('change', () => {
-      handleFiles(fileInput.files);
-    });
+    fileInput.addEventListener('change', updateFileList);
 
-    function handleFiles(items) {
-      filesToUpload = [];
+    function updateFileList() {
       fileList.innerHTML = '';
+      const files = fileInput.files;
       let totalSize = 0;
-
-      const traverseFileTree = (item, path = '') => {
-        if (item.isFile) {
-          item.file((file) => {
-            file.fullPath = path + file.name;
-            filesToUpload.push(file);
-            totalSize += file.size;
-            const li = document.createElement('li');
-            li.textContent = file.fullPath + ' (' + formatSize(file.size) + ')';
-            fileList.appendChild(li);
-          });
-        } else if (item.isDirectory) {
-          const dirReader = item.createReader();
-          dirReader.readEntries((entries) => {
-            entries.forEach((entry) => {
-              traverseFileTree(entry, path + item.name + '/');
-            });
-          });
-        }
-      };
-
-      if (items instanceof FileList) {
-        for (let i = 0; i < items.length; i++) {
-          const file = items[i];
-          file.fullPath = file.webkitRelativePath || file.name;
-          filesToUpload.push(file);
-          totalSize += file.size;
-          const li = document.createElement('li');
-          li.textContent = file.fullPath + ' (' + formatSize(file.size) + ')';
-          fileList.appendChild(li);
-        }
-      } else {
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : items[i];
-          if (item) {
-            traverseFileTree(item);
-          }
-        }
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        totalSize += file.size;
+        const li = document.createElement('li');
+        li.textContent = file.name + ' (' + formatSize(file.size) + ')';
+        fileList.appendChild(li);
       }
-
-      const estimatedCost = ((totalSize / (1024 * 1024 * 1024)) * 0.02).toFixed(2); // 假设每GB 0.02美元
-      feeWarning.textContent = lang === 'zh'
-        ? `预计费用：$${estimatedCost}`
-        : `Estimated cost: $${estimatedCost}`;
+      const estimatedCost = (
+        (totalSize / (1024 * 1024 * 1024)) *
+        0.02
+      ).toFixed(2); // 假设每GB 0.02美元
+      feeWarning.textContent =
+        lang === 'zh'
+          ? \`预计费用：\$\${estimatedCost}\`
+          : \`Estimated cost: \$\${estimatedCost}\`;
     }
 
     async function uploadFiles() {
-      if (filesToUpload.length === 0) return;
+      const files = fileInput.files;
+      if (files.length === 0) return;
 
       progress.style.display = 'block';
       progressBar.style.width = '0%';
       uploadResult.style.display = 'none';
       uploadingIndicator.style.display = 'block';
-      errorLog.innerHTML = '';
 
       const storageType = storageTypeSelect.value;
-      const previewEnabled = previewEnabledCheckbox.checked;
 
-      for (let i = 0; i < filesToUpload.length; i++) {
-        const file = filesToUpload[i];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
         // 保留对存储介质的选择
         let currentStorageType = storageType;
-        if (file.size > 25 * 1024 * 1024 && currentStorageType !== 'r2') {
+        if (
+          file.size > 25 * 1024 * 1024 &&
+          currentStorageType !== 'r2'
+        ) {
           currentStorageType = 'r2';
         }
 
         const formData = new FormData();
         formData.append('file', file);
         formData.append('storage', currentStorageType);
-        formData.append('previewEnabled', previewEnabled);
-        formData.append('path', file.fullPath ? file.fullPath.replace(file.name, '') : '');
 
         try {
           const response = await fetch('/upload', {
@@ -419,24 +490,40 @@ export const mainTemplate = (lang = 'en', files = []) => {
           });
 
           if (!response.ok) {
-            throw new Error(response.statusText);
+            const errorText = await response.text();
+            throw new Error(errorText);
           }
 
           const data = await response.json();
-          const shareUrl = `${window.location.origin}/file/${data.id}`;
+          const shareUrl = \`\${window.location.origin}/file/\${data.id}\`;
 
           uploadResult.style.display = 'block';
-          uploadResult.innerHTML += `
-            <p>${lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:'} <a href="${shareUrl}" target="_blank">${data.filename}</a></p>
-          `;
+          uploadResult.innerHTML += \`
+            <p>\${
+              lang === 'zh'
+                ? '文件上传成功：'
+                : 'File uploaded successfully:'
+            } <a href="\${shareUrl}" target="_blank">\${data.filename}</a></p>
+          \`;
 
+          showNotification(
+            lang === 'zh' ? '文件上传成功' : 'File uploaded successfully',
+            'success'
+          );
         } catch (error) {
-          errorLog.innerHTML += `
-            <p>${lang === 'zh' ? '上传失败：' : 'Upload failed:'} ${file.fullPath || file.name} - ${error.message}</p>
-          `;
+          uploadResult.style.display = 'block';
+          uploadResult.innerHTML +=
+            (lang === 'zh' ? '上传失败: ' : 'Upload failed: ') +
+            error.message +
+            '<br>';
+          showNotification(
+            (lang === 'zh' ? '上传失败: ' : 'Upload failed: ') +
+              error.message,
+            'error'
+          );
         }
 
-        progressBar.style.width = `${((i + 1) / filesToUpload.length) * 100}%`;
+        progressBar.style.width = \`\${((i + 1) / files.length) * 100}%\`;
       }
 
       uploadingIndicator.style.display = 'none';
@@ -447,11 +534,38 @@ export const mainTemplate = (lang = 'en', files = []) => {
       }, 2000);
     }
 
-    async function deleteFile(id) {
-      if (!confirm(lang === 'zh' ? '确定删除此文件？' : 'Are you sure you want to delete this file?')) {
-        return;
-      }
+    function showNotification(message, type = 'success') {
+      notificationMessage.textContent = message;
+      notificationBar.style.background =
+        type === 'success' ? '#000' : 'red';
+      notificationBar.classList.add('show');
+      setTimeout(() => {
+        hideNotification();
+      }, 5000);
+    }
 
+    function hideNotification() {
+      notificationBar.classList.remove('show');
+    }
+
+    function confirmDelete(button, id) {
+      if (button.dataset.confirmed) {
+        // 执行删除
+        deleteFile(id);
+      } else {
+        button.textContent =
+          lang === 'zh' ? '确认删除' : 'Confirm Delete';
+        button.dataset.confirmed = true;
+        button.style.background = 'red';
+        setTimeout(() => {
+          button.textContent = lang === 'zh' ? '删除' : 'Delete';
+          delete button.dataset.confirmed;
+          button.style.background = '#000';
+        }, 3000); // 3 秒后重置按钮
+      }
+    }
+
+    async function deleteFile(id) {
       const formData = new FormData();
       formData.append('id', id);
 
@@ -464,97 +578,64 @@ export const mainTemplate = (lang = 'en', files = []) => {
         const result = await response.json();
 
         if (result.success) {
-          // 移除文件行
+          // 刷新页面
           window.location.reload();
         } else {
-          alert(lang === 'zh' ? '删除失败' : 'Failed to delete');
+          showNotification(
+            lang === 'zh' ? '删除失败' : 'Failed to delete',
+            'error'
+          );
         }
       } catch (error) {
-        alert(lang === 'zh' ? '删除失败: ' : 'Failed to delete: ' + error.message);
+        showNotification(
+          (lang === 'zh' ? '删除失败: ' : 'Failed to delete: ') +
+            error.message,
+          'error'
+        );
+      }
+    }
+
+    function copyLink(id, button) {
+      const link = \`\${window.location.origin}/file/\${id}\`;
+      navigator.clipboard
+        .writeText(link)
+        .then(() => {
+          showNotification(
+            lang === 'zh' ? '链接已复制' : 'Link copied to clipboard',
+            'success'
+          );
+          button.textContent = lang === 'zh' ? '已复制' : 'Copied';
+          button.style.background = '#333';
+          setTimeout(() => {
+            button.textContent =
+              lang === 'zh' ? '复制链接' : 'Copy Link';
+            button.style.background = '#000';
+          }, 2000);
+        })
+        .catch((err) => {
+          showNotification(
+            lang === 'zh' ? '无法复制链接' : 'Failed to copy link',
+            'error'
+          );
+        });
+    }
+
+    function logout() {
+      if (
+        confirm(
+          lang === 'zh'
+            ? '确定要退出登录吗？'
+            : 'Are you sure you want to logout?'
+        )
+      ) {
+        fetch('/logout', {
+          method: 'POST',
+        }).then(() => {
+          window.location.href = '/auth';
+        });
       }
     }
   </script>
-</body>
-</html>
-`;
-};
-
-export const previewTemplate = (lang = 'en', file, id) => {
-  const isZh = lang === 'zh';
-  let contentHtml = '';
-  const filename = file.filename.toLowerCase();
-
-  if (filename.match(/\.(jpg|jpeg|png|gif|bmp)$/)) {
-    // 图片预览
-    const fileUrl = `/file/${id}`;
-    contentHtml = `<img src="${fileUrl}" alt="${file.filename}" style="max-width: 100%; height: auto;">`;
-  } else if (filename.match(/\.(mp4|webm|ogg)$/)) {
-    // 视频预览
-    const fileUrl = `/file/${id}`;
-    contentHtml = `<video controls style="max-width: 100%; height: auto;">
-                     <source src="${fileUrl}" type="video/${filename.split('.').pop()}">
-                   </video>`;
-  } else if (filename.match(/\.(mp3|wav|ogg)$/)) {
-    // 音频预览
-    const fileUrl = `/file/${id}`;
-    contentHtml = `<audio controls>
-                     <source src="${fileUrl}" type="audio/${filename.split('.').pop()}">
-                   </audio>`;
-  } else if (filename.match(/\.(pdf)$/)) {
-    // PDF 预览
-    const fileUrl = `/file/${id}`;
-    contentHtml = `<iframe src="${fileUrl}" style="width:100%; height:100vh;" frameborder="0"></iframe>`;
-  } else if (filename.match(/\.(txt|md|js|css|html|json|xml)$/)) {
-    // 文本文件预览
-    const fileUrl = `/file/${id}`;
-    contentHtml = `<iframe src="${fileUrl}" style="width:100%; height:100vh;" frameborder="0"></iframe>`;
-  } else {
-    // 其他文件类型
-    contentHtml = `<p>${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>`;
-  }
-
-  return `
-<!DOCTYPE html>
-<html lang="${isZh ? 'zh' : 'en'}">
-<head>
-  <meta charset="UTF-8">
-  <title>${file.filename}</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      position: relative;
-    }
-    .download-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .download-btn:hover {
-      background: rgba(0, 0, 0, 0.9);
-    }
-    .content {
-      max-width: 100%;
-      max-height: 100%;
-    }
-  </style>
-</head>
-<body>
-  <button class="download-btn" onclick="window.location.href='/file/${id}'">${isZh ? '下载' : 'Download'}</button>
-  <div class="content">
-    ${contentHtml}
-  </div>
 </body>
 </html>
 `;
