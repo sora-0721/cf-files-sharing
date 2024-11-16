@@ -5,37 +5,15 @@ class D1Storage {
     this.db = db;
   }
 
-  // 将二进制数据转换为 Base64 字符串的函数
-  arrayBufferToBase64(buffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-  }
-
-  // 将 Base64 字符串转换回二进制数据的函数
-  base64ToArrayBuffer(base64) {
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
-
   async store(id, file, previewEnabled, path = '') {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      // 将 ArrayBuffer 转换为 Base64 字符串
-      const base64String = this.arrayBufferToBase64(arrayBuffer);
 
       await this.db.prepare(
         'INSERT INTO files (id, filename, path, size, storage_type, preview_enabled, content) VALUES (?, ?, ?, ?, ?, ?, ?)'
-      ).bind(id, file.name, path, file.size, 'd1', previewEnabled ? 1 : 0, base64String).run();
+      ).bind(id, file.name, path, file.size, 'd1', previewEnabled ? 1 : 0, arrayBuffer).run();
+
+      console.log(`File stored in D1: ${file.name} (ID: ${id})`);
     } catch (error) {
       console.error('D1 store error:', error);
       throw error;
@@ -49,8 +27,9 @@ class D1Storage {
       ).bind(id).first();
 
       if (result) {
-        // 将 Base64 字符串解码回 ArrayBuffer
-        const arrayBuffer = this.base64ToArrayBuffer(result.content);
+        const arrayBuffer = result.content;
+
+        console.log(`File retrieved from D1: ${result.filename} (ID: ${id})`);
 
         return {
           stream: new Response(arrayBuffer).body,
@@ -60,6 +39,7 @@ class D1Storage {
           preview_enabled: result.preview_enabled === 1,
         };
       }
+      console.warn(`File not found in D1: ID ${id}`);
       return null;
     } catch (error) {
       console.error('D1 retrieve error:', error);
@@ -72,6 +52,7 @@ class D1Storage {
       const result = await this.db.prepare(
         'DELETE FROM files WHERE id = ?'
       ).bind(id).run();
+      console.log(`File deleted from D1: ID ${id}`);
       return result.success;
     } catch (error) {
       console.error('D1 delete error:', error);
@@ -84,6 +65,7 @@ class D1Storage {
       const results = await this.db.prepare(
         'SELECT id, filename, path, size, storage_type, preview_enabled, created_at FROM files ORDER BY created_at DESC'
       ).all();
+      console.log(`Listed ${results.results.length} files from D1`);
       return results.results || [];
     } catch (error) {
       console.error('D1 list error:', error);
