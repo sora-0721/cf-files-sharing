@@ -34,6 +34,12 @@ Select file → Check file size → >25MB → Use R2 storage
 Download process:
 Access the sharing link → Parse the file ID → Determine storage location → Retrieve file → Return file content
 ```
+## Update
+
+- more beautiful web
+- uplaod more than one flies at once
+- uplaod a folders
+
 
 ## Deployment Guide
 
