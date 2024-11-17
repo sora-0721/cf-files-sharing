@@ -122,7 +122,8 @@ class StorageManager {
   async list() {
     // 仅从 D1 获取文件列表
     const files = await this.d1Storage.list();
-    return files;
+    console.log(`StorageManager.list() received ${files.length} files.`);
+    return Array.isArray(files) ? files : [];
   }
 
   async getMetadata(id) {
