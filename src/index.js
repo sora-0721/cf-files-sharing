@@ -138,27 +138,42 @@ export default {
     // 文件上传处理
     if (url.pathname === '/upload' && request.method === 'POST') {
       const formData = await request.formData();
-      const file = formData.get('file');
+      const files = formData.getAll('file'); // 获取所有文件
       let storageType = formData.get('storage');
 
-      // 保留对存储介质的选择
-      if (file.size > 25 * 1024 * 1024 && storageType !== 'r2') {
-        storageType = 'r2'; // 大于25MB的文件强制使用R2
+      let results = [];
+      let errors = [];
+
+      for (let file of files) {
+        // 根据文件大小选择存储方式
+        let currentStorageType = storageType;
+        if (file.size > 25 * 1024 * 1024 && currentStorageType !== 'r2') {
+          currentStorageType = 'r2';
+        }
+
+        try {
+          const metadata = await storageManager.store(file, currentStorageType);
+
+          results.push({
+            id: metadata.id,
+            filename: metadata.filename,
+            size: metadata.size,
+            storage_type: metadata.storage_type,
+          });
+        } catch (error) {
+          console.error('Upload error:', error);
+          errors.push({
+            filename: file.name,
+            message: error.message,
+          });
+        }
       }
 
-      try {
-        const metadata = await storageManager.store(file, storageType);
-
-        return jsonResponse({
-          id: metadata.id,
-          filename: metadata.filename,
-          size: metadata.size,
-          storage_type: metadata.storage_type,
-        });
-      } catch (error) {
-        console.error('Upload error:', error);
-        return jsonResponse({ error: error.message }, 500);
+      if (errors.length > 0) {
+        return jsonResponse({ results, errors }, 207); // 207 Multi-Status
       }
+
+      return jsonResponse({ results });
     }
 
     // 主页面
