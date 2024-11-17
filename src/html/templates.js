@@ -106,6 +106,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     .container {
       max-width: 800px;
       margin: 0 auto;
+      position: relative;
     }
     .upload-form {
       background: #fff;
