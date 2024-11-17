@@ -9,7 +9,60 @@ export const loginTemplate = (lang = 'zh', message = '') => {
   <meta charset="UTF-8">
   <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
   <style>
-    /* 省略样式部分，保持不变 */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #fff;
+      color: #000;
+    }
+    .login-form {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-width: 400px;
+      margin: 1rem;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+      color: #000;
+      background: #fff;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #333;
+    }
+    .error-message {
+      color: red;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #000;
+    }
   </style>
 </head>
 <body>
@@ -43,7 +96,269 @@ export const mainTemplate = (lang = 'zh', files = []) => {
   <meta charset="UTF-8">
   <title>${isZh ? '文件分享' : 'File Share'}</title>
   <style>
-    /* 省略样式部分，保持不变 */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #fff;
+      color: #000;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .upload-form {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      position: relative;
+    }
+    .upload-form h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #000;
+    }
+    .drag-drop {
+      border: 2px dashed #ccc;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      position: relative;
+      transition: background 0.3s;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .drag-drop.hover {
+      background: #f9f9f9;
+    }
+    .drag-drop input[type="file"] {
+      display: none;
+    }
+    .drag-drop p {
+      margin: 0;
+      font-size: 18px;
+      color: #000;
+    }
+    .drag-drop .file-list {
+      margin-top: 1rem;
+      text-align: left;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .drag-drop .file-list li {
+      list-style: none;
+      margin-bottom: 0.5rem;
+      color: #000;
+    }
+    .drag-drop .upload-btn,
+    .drag-drop .open-btn {
+      padding: 10px 20px;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 0.5rem;
+    }
+    .drag-drop .upload-btn:hover,
+    .drag-drop .open-btn:hover {
+      background: #333;
+    }
+    .storage-options {
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .progress {
+      width: 100%;
+      height: 6px;
+      background: #eee;
+      margin: 1rem 0;
+      display: none;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #000;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f8f8;
+      border-radius: 4px;
+      display: none;
+    }
+    button {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #333;
+    }
+    a {
+      color: #000;
+      text-decoration: underline;
+      transition: color 0.3s;
+    }
+    a:hover {
+      color: #333;
+    }
+    .file-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .file-table th, .file-table td {
+      border-bottom: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+      color: #000;
+    }
+    .file-table th {
+      background: #f9f9f9;
+      color: #000;
+    }
+    .file-table tr:last-child td {
+      border-bottom: none;
+    }
+    .delete-btn, .copy-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-right: 5px;
+    }
+    .delete-btn:hover {
+      background: red;
+    }
+    .copy-btn:hover {
+      background: #333;
+    }
+    .embed-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .embed-btn:hover {
+      background: #333;
+    }
+    .fee-warning {
+      margin-top: 1rem;
+      color: #666;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .uploading-indicator {
+      display: none;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .uploading-indicator img {
+      width: 50px;
+      height: 50px;
+    }
+    .logout-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      color: #000;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .logout-btn:hover {
+      color: red;
+    }
+    /* 通知栏样式 */
+    #notificationBar {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      background: #000;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      border-radius: 4px;
+      transition: bottom 0.5s ease-in-out;
+    }
+    #notificationBar.show {
+      bottom: 20px;
+    }
+    #notificationBar .message {
+      flex-grow: 1;
+      font-size: 16px;
+    }
+    #notificationBar .close-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    /* 响应式设计 */
+    @media (max-width: 600px) {
+      .upload-form {
+        padding: 1rem;
+      }
+      .drag-drop {
+        padding: 1rem;
+      }
+      .file-table th, .file-table td {
+        padding: 8px;
+      }
+      .logout-btn {
+        padding: 5px 10px;
+      }
+    }
+    /* 错误记录表样式 */
+    .error-log {
+      background: #ffe6e6;
+      border: 1px solid #ffcccc;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+    .error-log h3 {
+      margin-top: 0;
+      color: red;
+    }
+    .error-log ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .error-log li {
+      color: red;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
