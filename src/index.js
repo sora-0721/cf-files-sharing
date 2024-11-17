@@ -26,7 +26,7 @@ export default {
       // 解决中文文件名下载问题
       const filename = file.filename;
       const encodedFilename = encodeURIComponent(filename);
-      const contentDisposition = \`attachment; filename="\${encodedFilename}"; filename*=UTF-8''\${encodedFilename}\`;
+      const contentDisposition = `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`;
 
       return new Response(file.stream, {
         headers: {
