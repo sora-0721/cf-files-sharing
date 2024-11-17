@@ -888,10 +888,6 @@ export const viewTemplate = (lang = 'zh', file) => {
     ${contentHtml}
   </div>
   <script>
-    function downloadFile() {
-      window.location.href = '/file/${file.id}';
-    }
-
     function confirmLogout(button) {
       if (button.dataset.confirmed) {
         // 执行登出
