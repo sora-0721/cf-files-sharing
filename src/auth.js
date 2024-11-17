@@ -6,14 +6,14 @@ class Auth {
 
   static async validatePassword(password, env) {
     if (!env.AUTH_PASSWORD) {
-      throw new Error('AUTH_PASSWORD is not set in environment variables');
+      throw new Error('AUTH_PASSWORD 未在环境变量中设置');
     }
     return password === env.AUTH_PASSWORD;
   }
 
   static async generateToken(env) {
     if (!env.AUTH_PASSWORD) {
-      throw new Error('AUTH_PASSWORD is not set in environment variables');
+      throw new Error('AUTH_PASSWORD 未在环境变量中设置');
     }
     const encoder = new TextEncoder();
     const data = encoder.encode(env.AUTH_PASSWORD);
