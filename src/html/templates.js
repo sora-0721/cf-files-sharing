@@ -108,6 +108,22 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       margin: 0 auto;
       position: relative;
     }
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      z-index: 1000;
+    }
+    .logout-btn:hover {
+      background: #333;
+    }
     .upload-section {
       background: #fff;
       padding: 2rem;
@@ -115,35 +131,42 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       border: 1px solid #ccc;
       margin-bottom: 2rem;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
     .upload-section h2 {
       text-align: center;
       margin-bottom: 1.5rem;
       color: #000;
     }
+    .upload-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
     .drag-drop {
       border: 2px dashed #ccc;
       padding: 2rem;
       text-align: center;
-      margin-bottom: 1rem;
-      position: relative;
       transition: background 0.3s;
       border-radius: 8px;
       background: #fff;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     .drag-drop.hover {
       background: #f9f9f9;
-    }
-    .drag-drop input[type="file"] {
-      display: none;
     }
     .drag-drop p {
       margin: 0;
       font-size: 18px;
       color: #000;
     }
-    .drag-drop .upload-btn,
-    .drag-drop .open-btn {
+    .upload-btn {
       padding: 10px 20px;
       background: #000;
       color: #fff;
@@ -151,11 +174,24 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.3s;
-      margin: 0.5rem;
+      margin-top: 1rem;
     }
-    .drag-drop .upload-btn:hover,
-    .drag-drop .open-btn:hover {
+    .upload-btn:hover {
       background: #333;
+    }
+    .file-list {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      text-align: left;
+    }
+    .file-list li {
+      margin-bottom: 0.5rem;
+      color: #000;
+      word-break: break-all;
     }
     .storage-options {
       margin: 1rem 0;
@@ -182,28 +218,30 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       background: #f8f8f8;
       border-radius: 4px;
       display: none;
+      word-break: break-all;
     }
-    button {
-      background: #000;
-      color: #fff;
-      border: none;
-      padding: 6px 12px;
+    .error-log {
+      background: #ffe6e6;
+      border: 1px solid #ffcccc;
+      padding: 1rem;
       border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s;
+      margin-top: 1rem;
+      display: none;
     }
-    button:hover {
-      background: #333;
+    .error-log h3 {
+      margin-top: 0;
+      color: red;
     }
-    a {
-      color: #000;
-      text-decoration: underline;
-      transition: color 0.3s;
+    .error-log ul {
+      list-style: none;
+      padding-left: 0;
     }
-    a:hover {
-      color: #333;
+    .error-log li {
+      color: red;
+      margin-bottom: 0.5rem;
+      word-break: break-all;
     }
-    .file-table {
+    table.file-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 2rem;
@@ -212,20 +250,20 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       border-radius: 8px;
       overflow: hidden;
     }
-    .file-table th, .file-table td {
+    table.file-table th, table.file-table td {
       border-bottom: 1px solid #ddd;
       padding: 12px;
       text-align: left;
       color: #000;
     }
-    .file-table th {
+    table.file-table th {
       background: #f9f9f9;
       color: #000;
     }
-    .file-table tr:last-child td {
+    table.file-table tr:last-child td {
       border-bottom: none;
     }
-    .delete-btn, .copy-btn {
+    .delete-btn, .copy-btn, .embed-btn {
       background: #000;
       color: #fff;
       border: none;
@@ -240,15 +278,6 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     }
     .copy-btn:hover {
       background: #333;
-    }
-    .embed-btn {
-      background: #000;
-      color: #fff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s;
     }
     .embed-btn:hover {
       background: #333;
@@ -267,20 +296,6 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     .uploading-indicator img {
       width: 50px;
       height: 50px;
-    }
-    .logout-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: transparent;
-      color: #000;
-      font-size: 16px;
-      border: none;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .logout-btn:hover {
-      color: red;
     }
     /* 通知栏样式 */
     #notificationBar {
@@ -322,32 +337,12 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       .drag-drop {
         padding: 1rem;
       }
-      .file-table th, .file-table td {
+      table.file-table th, table.file-table td {
         padding: 8px;
       }
       .logout-btn {
         padding: 5px 10px;
       }
-    }
-    /* 错误记录表样式 */
-    .error-log {
-      background: #ffe6e6;
-      border: 1px solid #ffcccc;
-      padding: 1rem;
-      border-radius: 4px;
-      margin-top: 1rem;
-    }
-    .error-log h3 {
-      margin-top: 0;
-      color: red;
-    }
-    .error-log ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    .error-log li {
-      color: red;
-      margin-bottom: 0.5rem;
     }
   </style>
 </head>
@@ -355,56 +350,38 @@ export const mainTemplate = (lang = 'zh', files = []) => {
   <div class="container">
     <button class="logout-btn" onclick="logout()">${isZh ? '退出登录' : 'Logout'}</button>
 
-    <!-- 上传文件部分 -->
+    <!-- 上传部分 -->
     <div class="upload-section">
       <h2>${isZh ? '上传文件' : 'Upload Files'}</h2>
-      <div class="drag-drop" id="fileDragDropArea">
-        <p>${isZh ? '将文件拖拽到此处' : 'Drag and drop files here'}</p>
+      <div class="upload-buttons">
+        <button class="upload-btn" onclick="triggerFileUpload()">${isZh ? '上传文件' : 'Upload Files'}</button>
+        <button class="upload-btn" onclick="triggerFolderUpload()">${isZh ? '上传文件夹' : 'Upload Folders'}</button>
+      </div>
+      <!-- 文件上传隐藏输入 -->
+      <input type="file" id="fileInput" multiple style="display: none;">
+      <!-- 文件夹上传隐藏输入 -->
+      <input type="file" id="folderInput" multiple webkitdirectory directory style="display: none;">
+      <!-- 拖拽区域 -->
+      <div class="drag-drop" id="dragDropArea">
+        <p>${isZh ? '将文件或文件夹拖拽到此处' : 'Drag and drop files or folders here'}</p>
         <ul class="file-list" id="fileList"></ul>
-        <input type="file" id="fileInput" multiple>
-        <button class="open-btn" onclick="document.getElementById('fileInput').click()">${isZh ? '选择文件' : 'Choose Files'}</button>
-        <button class="upload-btn" onclick="uploadFiles()">${isZh ? '上传文件' : 'Upload Files'}</button>
       </div>
-      <div class="fee-warning" id="fileFeeWarning"></div>
+      <div class="fee-warning" id="feeWarning"></div>
       <div class="progress">
-        <div class="progress-bar" id="fileProgressBar"></div>
+        <div class="progress-bar" id="progressBar"></div>
       </div>
-      <div class="uploading-indicator" id="fileUploadingIndicator">
-        <p>${isZh ? '正在上传文件...' : 'Uploading files...'}</p>
+      <div class="uploading-indicator" id="uploadingIndicator">
+        <p>${isZh ? '正在上传...' : 'Uploading...'}</p>
         <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwgAAAAAAACH5BAEAAAEALAAAAAAQABAAAAIgjI+pq+D9mDEd0dW1HUFW6XoYAOw==" alt="Uploading">
       </div>
-      <div class="result" id="fileUploadResult"></div>
-      <div class="error-log" id="fileErrorLog" style="display: none;">
+      <div class="result" id="uploadResult"></div>
+      <div class="error-log" id="errorLog" style="display: none;">
         <h3>${isZh ? '错误记录' : 'Error Log'}</h3>
-        <ul id="fileErrorList"></ul>
+        <ul id="errorList"></ul>
       </div>
     </div>
 
-    <!-- 上传文件夹部分 -->
-    <div class="upload-section">
-      <h2>${isZh ? '上传文件夹' : 'Upload Folder'}</h2>
-      <div class="drag-drop" id="folderDragDropArea">
-        <p>${isZh ? '将文件夹拖拽到此处' : 'Drag and drop folders here'}</p>
-        <ul class="file-list" id="folderFileList"></ul>
-        <input type="file" id="folderInput" multiple webkitdirectory directory>
-        <button class="open-btn" onclick="document.getElementById('folderInput').click()">${isZh ? '选择文件夹' : 'Choose Folder'}</button>
-        <button class="upload-btn" onclick="uploadFolders()">${isZh ? '上传文件夹' : 'Upload Folders'}</button>
-      </div>
-      <div class="fee-warning" id="folderFeeWarning"></div>
-      <div class="progress">
-        <div class="progress-bar" id="folderProgressBar"></div>
-      </div>
-      <div class="uploading-indicator" id="folderUploadingIndicator">
-        <p>${isZh ? '正在上传文件夹...' : 'Uploading folders...'}</p>
-        <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwgAAAAAAACH5BAEAAAEALAAAAAAQABAAAAIgjI+pq+D9mDEd0dW1HUFW6XoYAOw==" alt="Uploading">
-      </div>
-      <div class="result" id="folderUploadResult"></div>
-      <div class="error-log" id="folderErrorLog" style="display: none;">
-        <h3>${isZh ? '错误记录' : 'Error Log'}</h3>
-        <ul id="folderErrorList"></ul>
-      </div>
-    </div>
-
+    <!-- 文件列表表格 -->
     <table class="file-table">
       <thead>
         <tr>
@@ -465,52 +442,51 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     // 将服务器端的 isZh 传递到客户端
     const isZh = ${isZh ? 'true' : 'false'};
 
-    // 文件上传相关元素
-    const fileDragDropArea = document.getElementById('fileDragDropArea');
+    // 上传相关元素
+    const dragDropArea = document.getElementById('dragDropArea');
     const fileInput = document.getElementById('fileInput');
-    const fileList = document.getElementById('fileList');
-    const fileFeeWarning = document.getElementById('fileFeeWarning');
-    const fileProgressBar = document.getElementById('fileProgressBar');
-    const fileProgress = fileProgressBar.parentElement;
-    const fileUploadingIndicator = document.getElementById('fileUploadingIndicator');
-    const fileUploadResult = document.getElementById('fileUploadResult');
-    const fileErrorLog = document.getElementById('fileErrorLog');
-    const fileErrorList = document.getElementById('fileErrorList');
-
-    // 文件夹上传相关元素
-    const folderDragDropArea = document.getElementById('folderDragDropArea');
     const folderInput = document.getElementById('folderInput');
-    const folderFileList = document.getElementById('folderFileList');
-    const folderFeeWarning = document.getElementById('folderFeeWarning');
-    const folderProgressBar = document.getElementById('folderProgressBar');
-    const folderProgress = folderProgressBar.parentElement;
-    const folderUploadingIndicator = document.getElementById('folderUploadingIndicator');
-    const folderUploadResult = document.getElementById('folderUploadResult');
-    const folderErrorLog = document.getElementById('folderErrorLog');
-    const folderErrorList = document.getElementById('folderErrorList');
-
+    const fileList = document.getElementById('fileList');
+    const feeWarning = document.getElementById('feeWarning');
+    const progressBar = document.getElementById('progressBar');
+    const progress = document.querySelector('.progress');
+    const uploadResult = document.getElementById('uploadResult');
+    const uploadingIndicator = document.getElementById('uploadingIndicator');
+    const errorLog = document.getElementById('errorLog');
+    const errorList = document.getElementById('errorList');
     const notificationBar = document.getElementById('notificationBar');
     const notificationMessage = notificationBar.querySelector('.message');
 
     let selectedFiles = [];
-    let selectedFolders = [];
+
+    // 上传按钮事件
+    function triggerFileUpload() {
+      fileInput.click();
+    }
+
+    function triggerFolderUpload() {
+      folderInput.click();
+    }
 
     // 文件拖拽事件
-    fileDragDropArea.addEventListener('dragover', (e) => {
+    dragDropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
-      fileDragDropArea.classList.add('hover');
+      dragDropArea.classList.add('hover');
     });
 
-    fileDragDropArea.addEventListener('dragleave', () => {
-      fileDragDropArea.classList.remove('hover');
+    dragDropArea.addEventListener('dragleave', () => {
+      dragDropArea.classList.remove('hover');
     });
 
-    fileDragDropArea.addEventListener('drop', async (e) => {
+    dragDropArea.addEventListener('drop', async (e) => {
       e.preventDefault();
-      fileDragDropArea.classList.remove('hover');
-      const files = e.dataTransfer.files;
-      for (let i = 0; i < files.length; i++) {
-        selectedFiles.push(files[i]);
+      dragDropArea.classList.remove('hover');
+      const items = e.dataTransfer.items;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i].webkitGetAsEntry();
+        if (item) {
+          await traverseFileTree(item);
+        }
       }
       updateFileList();
     });
@@ -524,44 +500,21 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       updateFileList();
     });
 
-    // 文件夹拖拽事件
-    folderDragDropArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      folderDragDropArea.classList.add('hover');
-    });
-
-    folderDragDropArea.addEventListener('dragleave', () => {
-      folderDragDropArea.classList.remove('hover');
-    });
-
-    folderDragDropArea.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      folderDragDropArea.classList.remove('hover');
-      const items = e.dataTransfer.items;
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i].webkitGetAsEntry();
-        if (item) {
-          await traverseFolder(item);
-        }
-      }
-      updateFolderList();
-    });
-
     // 文件夹输入变化事件
     folderInput.addEventListener('change', async () => {
       const files = folderInput.files;
       for (let i = 0; i < files.length; i++) {
-        selectedFolders.push(files[i]);
+        selectedFiles.push(files[i]);
       }
-      updateFolderList();
+      updateFileList();
     });
 
-    async function traverseFolder(item, path = '') {
+    async function traverseFileTree(item, path = '') {
       return new Promise((resolve) => {
         if (item.isFile) {
           item.file((file) => {
             file.fullPath = path + file.name;
-            selectedFolders.push(file);
+            selectedFiles.push(file);
             resolve();
           });
         } else if (item.isDirectory) {
@@ -569,7 +522,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           dirReader.readEntries((entries) => {
             const promises = [];
             for (let i = 0; i < entries.length; i++) {
-              promises.push(traverseFolder(entries[i], path + item.name + '/'));
+              promises.push(traverseFileTree(entries[i], path + item.name + '/'));
             }
             Promise.all(promises).then(() => resolve());
           });
@@ -590,26 +543,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         (totalSize / (1024 * 1024 * 1024)) *
         0.02
       ).toFixed(2); // 假设每GB 0.02美元
-      fileFeeWarning.textContent =
-        isZh
-          ? '预计费用：$' + estimatedCost
-          : 'Estimated cost: $' + estimatedCost;
-    }
-
-    function updateFolderList() {
-      folderFileList.innerHTML = '';
-      let totalSize = 0;
-      selectedFolders.forEach((file) => {
-        totalSize += file.size;
-        const li = document.createElement('li');
-        li.textContent = file.fullPath ? file.fullPath + ' (' + formatSize(file.size) + ')' : file.name + ' (' + formatSize(file.size) + ')';
-        folderFileList.appendChild(li);
-      });
-      const estimatedCost = (
-        (totalSize / (1024 * 1024 * 1024)) *
-        0.02
-      ).toFixed(2); // 假设每GB 0.02美元
-      folderFeeWarning.textContent =
+      feeWarning.textContent =
         isZh
           ? '预计费用：$' + estimatedCost
           : 'Estimated cost: $' + estimatedCost;
@@ -618,12 +552,12 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     async function uploadFiles() {
       if (selectedFiles.length === 0) return;
 
-      fileProgress.style.display = 'block';
-      fileProgressBar.style.width = '0%';
-      fileUploadResult.style.display = 'none';
-      fileUploadingIndicator.style.display = 'block';
-      fileErrorLog.style.display = 'none';
-      fileErrorList.innerHTML = '';
+      progress.style.display = 'block';
+      progressBar.style.width = '0%';
+      uploadResult.style.display = 'none';
+      uploadingIndicator.style.display = 'block';
+      errorLog.style.display = 'none';
+      errorList.innerHTML = '';
 
       const storageType = document.getElementById('storageType').value;
       let errors = [];
@@ -653,24 +587,44 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           }
 
           const data = await response.json();
-          const shareUrl = window.location.origin + '/file/' + data.id;
-          const viewUrl = window.location.origin + '/view/' + data.id;
-          const embedUrl = window.location.origin + '/embed/' + data.id;
+          data.results.forEach((result) => {
+            const shareUrl = window.location.origin + '/file/' + result.id;
+            const viewUrl = window.location.origin + '/view/' + result.id;
+            const embedUrl = window.location.origin + '/embed/' + result.id;
 
-          fileUploadResult.style.display = 'block';
-          fileUploadResult.innerHTML += '<p>' +
-            (isZh ? '文件上传成功：' : 'File uploaded successfully:') +
-            ' <a href="' + shareUrl + '" target="_blank">' + data.filename + '</a> | ' +
-            ' <a href="/view/' + data.id + '" target="_blank">' + (isZh ? '浏览' : 'View') + '</a> | ' + 
-            ' <a href="/embed/' + data.id + '" target="_blank">' + (isZh ? '嵌入' : 'Embed') + '</a></p>';
+            uploadResult.style.display = 'block';
+            uploadResult.innerHTML += '<p>' +
+              (isZh ? '文件上传成功：' : 'File uploaded successfully:') +
+              ' <a href="' + shareUrl + '" target="_blank">' + result.filename + '</a> | ' +
+              ' <a href="/view/' + result.id + '" target="_blank">' + (isZh ? '浏览' : 'View') + '</a> | ' + 
+              ' <a href="/embed/' + result.id + '" target="_blank">' + (isZh ? '嵌入' : 'Embed') + '</a></p>';
+          });
 
-          showNotification(
-            isZh ? '文件上传成功' : 'File uploaded successfully',
-            'success'
-          );
+          if (data.results.length > 0) {
+            showNotification(
+              isZh ? '文件上传成功' : 'File uploaded successfully',
+              'success'
+            );
+          }
+
+          if (data.errors && data.errors.length > 0) {
+            data.errors.forEach((err) => {
+              uploadResult.style.display = 'block';
+              uploadResult.innerHTML +=
+                (isZh ? '上传失败: ' : 'Upload failed: ') +
+                err.filename + ' - ' + err.message +
+                '<br>';
+              showNotification(
+                (isZh ? '上传失败: ' : 'Upload failed: ') +
+                  err.filename + ' - ' + err.message,
+                'error'
+              );
+              errors.push((isZh ? '上传失败: ' : 'Upload failed: ') + err.filename + ' - ' + err.message);
+            });
+          }
         } catch (error) {
-          fileUploadResult.style.display = 'block';
-          fileUploadResult.innerHTML +=
+          uploadResult.style.display = 'block';
+          uploadResult.innerHTML +=
             (isZh ? '上传失败: ' : 'Upload failed: ') +
             error.message +
             '<br>';
@@ -682,108 +636,23 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           errors.push((isZh ? '上传失败: ' : 'Upload failed: ') + error.message);
         }
 
-        fileProgressBar.style.width = ((i + 1) / selectedFiles.length * 100) + '%';
+        progressBar.style.width = ((i + 1) / selectedFiles.length * 100) + '%';
       }
 
-      fileUploadingIndicator.style.display = 'none';
+      uploadingIndicator.style.display = 'none';
 
       if (errors.length > 0) {
-        fileErrorLog.style.display = 'block';
+        errorLog.style.display = 'block';
         errors.forEach((err) => {
           const li = document.createElement('li');
           li.textContent = err;
-          fileErrorList.appendChild(li);
+          errorList.appendChild(li);
         });
       }
 
       // 清空选中的文件
       selectedFiles = [];
       fileInput.value = '';
-    }
-
-    async function uploadFolders() {
-      if (selectedFolders.length === 0) return;
-
-      folderProgress.style.display = 'block';
-      folderProgressBar.style.width = '0%';
-      folderUploadResult.style.display = 'none';
-      folderUploadingIndicator.style.display = 'block';
-      folderErrorLog.style.display = 'none';
-      folderErrorList.innerHTML = '';
-
-      const storageType = document.getElementById('storageType').value;
-      let errors = [];
-
-      for (let i = 0; i < selectedFolders.length; i++) {
-        const file = selectedFolders[i];
-
-        // 根据文件大小选择存储方式
-        let currentStorageType = storageType;
-        if (file.size > 25 * 1024 * 1024 && currentStorageType !== 'r2') {
-          currentStorageType = 'r2';
-        }
-
-        const formData = new FormData();
-        formData.append('file', file, file.fullPath || file.name);
-        formData.append('storage', currentStorageType);
-
-        try {
-          const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText);
-          }
-
-          const data = await response.json();
-          const shareUrl = window.location.origin + '/file/' + data.id;
-          const viewUrl = window.location.origin + '/view/' + data.id;
-          const embedUrl = window.location.origin + '/embed/' + data.id;
-
-          folderUploadResult.style.display = 'block';
-          folderUploadResult.innerHTML += '<p>' +
-            (isZh ? '文件夹中的文件上传成功：' : 'Files in folder uploaded successfully:') +
-            ' <a href="' + shareUrl + '" target="_blank">' + data.filename + '</a> | ' +
-            ' <a href="/view/' + data.id + '" target="_blank">' + (isZh ? '浏览' : 'View') + '</a> | ' + 
-            ' <a href="/embed/' + data.id + '" target="_blank">' + (isZh ? '嵌入' : 'Embed') + '</a></p>';
-
-          showNotification(
-            isZh ? '文件夹中的文件上传成功' : 'Files in folder uploaded successfully',
-            'success'
-          );
-        } catch (error) {
-          folderUploadResult.style.display = 'block';
-          folderUploadResult.innerHTML +=
-            (isZh ? '上传失败: ' : 'Upload failed: ') +
-            error.message +
-            '<br>';
-          showNotification(
-            (isZh ? '上传失败: ' : 'Upload failed: ') +
-              error.message,
-            'error'
-          );
-          errors.push((isZh ? '上传失败: ' : 'Upload failed: ') + error.message);
-        }
-
-        folderProgressBar.style.width = ((i + 1) / selectedFolders.length * 100) + '%';
-      }
-
-      folderUploadingIndicator.style.display = 'none';
-
-      if (errors.length > 0) {
-        folderErrorLog.style.display = 'block';
-        errors.forEach((err) => {
-          const li = document.createElement('li');
-          li.textContent = err;
-          folderErrorList.appendChild(li);
-        });
-      }
-
-      // 清空选中的文件夹
-      selectedFolders = [];
       folderInput.value = '';
     }
 
