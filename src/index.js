@@ -2,7 +2,7 @@
 
 import { Auth } from './auth';
 import { StorageManager } from './storage/manager';
-import { loginTemplate, mainTemplate } from './html/templates';
+import { loginTemplate, mainTemplate, viewTemplate, embedTemplate } from './html/templates';
 import { jsonResponse, htmlResponse, errorResponse } from './utils/response';
 
 export default {
@@ -26,13 +26,53 @@ export default {
       // 解决中文文件名下载问题
       const filename = file.filename;
       const encodedFilename = encodeURIComponent(filename);
-      const contentDisposition = `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`;
+      const contentDisposition = \`attachment; filename="\${encodedFilename}"; filename*=UTF-8''\${encodedFilename}\`;
 
       return new Response(file.stream, {
         headers: {
           'Content-Disposition': contentDisposition,
           'Content-Type': 'application/octet-stream',
         },
+      });
+    }
+
+    // 文件浏览处理
+    if (url.pathname.startsWith('/view/')) {
+      const id = url.pathname.split('/')[2];
+      const file = await storageManager.retrieve(id);
+
+      if (!file) {
+        return errorResponse(lang === 'zh' ? '文件未找到' : 'File not found', 404);
+      }
+
+      // 获取文件的元数据
+      const metadata = await storageManager.getMetadata(id);
+      if (!metadata) {
+        return errorResponse(lang === 'zh' ? '文件元数据未找到' : 'File metadata not found', 404);
+      }
+
+      // 生成预览页面
+      const previewHtml = viewTemplate(lang, metadata);
+
+      return new Response(previewHtml, {
+        headers: { 'Content-Type': 'text/html' },
+      });
+    }
+
+    // 文件嵌入处理
+    if (url.pathname.startsWith('/embed/')) {
+      const id = url.pathname.split('/')[2];
+      const file = await storageManager.retrieve(id);
+
+      if (!file) {
+        return errorResponse(lang === 'zh' ? '文件未找到' : 'File not found', 404);
+      }
+
+      // 生成嵌入页面
+      const embedHtml = embedTemplate(lang, file);
+
+      return new Response(embedHtml, {
+        headers: { 'Content-Type': 'text/html' },
       });
     }
 
