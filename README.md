@@ -1,4 +1,4 @@
-# CloudFlare File Share（updating
+# CloudFlare File Share
 
 [English](https://github.com/joyance-professional/cf-files-sharing/blob/main/README.md)｜[简体中文](https://github.com/joyance-professional/cf-files-sharing/blob/main/README-cn.md)
 
