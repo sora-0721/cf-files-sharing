@@ -1,88 +1,8 @@
-// src/html/templates.js
-
-export const loginTemplate = (lang = 'zh', message = '') => {
-  const isZh = lang === 'zh';
-  return `
-<!DOCTYPE html>
-<html lang="${isZh ? 'zh' : 'en'}">
-<head>
-  <meta charset="UTF-8">
-  <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
-  <style>
-    /* 原有样式保持不变 */
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #fff;
-      color: #000;
-    }
-    .login-form {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 100%;
-      max-width: 400px;
-      margin: 1rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 12px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
-      color: #000;
-      background: #fff;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #000;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #333;
-    }
-    .error-message {
-      color: red;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: #000;
-    }
-  </style>
-</head>
-<body>
-  <div class="login-form">
-    <h2>${isZh ? '登录' : 'Login'}</h2>
-    ${message ? `<p class="error-message">${message}</p>` : ''}
-    <form method="POST" action="/auth">
-      <input type="password" name="password" placeholder="${isZh ? '密码' : 'Password'}" required>
-      <button type="submit">${isZh ? '登录' : 'Login'}</button>
-    </form>
-  </div>
-</body>
-</html>
-`;
-};
-
 export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
   const isZh = lang === 'zh';
+
+  // 确保 files 是一个数组
+  const safeFiles = Array.isArray(files) ? files : [];
 
   function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
@@ -503,16 +423,15 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
         </tr>
       </thead>
       <tbody>
-        ${files
-          .map(
-            (file) => `
+        ${safeFiles.map(
+          (file) => `
         <tr>
           <td>${file.filename}</td>
           <td>${formatSize(file.size)}</td>
           <td>${file.storage_type.toUpperCase()}</td>
           <td>${new Date(file.created_at).toLocaleString(
-              lang === 'zh' ? 'zh-CN' : 'en-US'
-            )}</td>
+            lang === 'zh' ? 'zh-CN' : 'en-US'
+          )}</td>
           <td>
             <button class="copy-btn" onclick="copyLink('${file.id}', this)">${isZh ? '复制链接' : 'Copy Link'}</button>
           </td>
@@ -527,8 +446,7 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
           </td>
         </tr>
       `
-          )
-          .join('')}
+        ).join('')}
       </tbody>
     </table>
   </div>
@@ -560,13 +478,13 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
       <input type="color" id="buttonColor" value="${settings.buttonColor || '#000000'}" onchange="updateThemeColor('buttonColor', this.value)">
       
       <label for="buttonTextColor">${isZh ? '按钮文字颜色' : 'Button Text Color'}</label>
-      <input type="color" id="buttonTextColor" value="${settings.buttonTextColor || '#ffffff'}" onchange="updateThemeColor('buttonTextColor', this.value)}">
+      <input type="color" id="buttonTextColor" value="${settings.buttonTextColor || '#ffffff'}" onchange="updateThemeColor('buttonTextColor', this.value)">
       
       <label for="headerBackground">${isZh ? '头部背景' : 'Header Background'}</label>
       <input type="color" id="headerBackground" value="${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'}" onchange="updateThemeColor('headerBackground', this.value)">
       
       <label for="headerTextColor">${isZh ? '头部文字颜色' : 'Header Text Color'}</label>
-      <input type="color" id="headerTextColor" value="${settings.headerTextColor || '#000000'}" onchange="updateThemeColor('headerTextColor', this.value)">
+      <input type="color" id="headerTextColor" value="${settings.headerTextColor || '#000000'}" onchange="updateThemeColor('headerTextColor', this.value)}">
       
       <label for="backgroundImage">${isZh ? '背景图片 URL' : 'Background Image URL'}</label>
       <input type="text" id="backgroundImage" placeholder="${isZh ? '请输入图片链接' : 'Enter image URL'}" value="${settings.backgroundImage || ''}" onchange="updateThemeImage(this.value)">
@@ -600,6 +518,7 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
     // 将服务器端的 isZh 和 settings 传递到客户端
     const isZh = ${isZh ? 'true' : 'false'};
     const initialSettings = ${JSON.stringify(settings)};
+    const initialLang = '${lang}';
 
     // 上传相关元素
     const dragDropArea = document.getElementById('dragDropArea');
@@ -977,7 +896,7 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
       root.style.setProperty('--header-text-color', currentSettings.headerTextColor || '#000');
 
       // 设置背景图片
-      document.body.style.backgroundImage = currentSettings.backgroundImage ? 'url('${currentSettings.backgroundImage}')' : '';
+      document.body.style.backgroundImage = currentSettings.backgroundImage ? `url('${currentSettings.backgroundImage}')` : '';
     }
 
     // 语言切换
@@ -1022,13 +941,13 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
         } else {
           const errorData = await response.json();
           showNotification(
-            isZh ? '保存失败: ${errorData.error}' : 'Save failed: ${errorData.error}',
+            isZh ? `保存失败: ${errorData.error}` : `Save failed: ${errorData.error}`,
             'error'
           );
         }
       } catch (error) {
         showNotification(
-          isZh ? '保存失败: ${error.message}' : 'Save failed: ${error.message}',
+          isZh ? `保存失败: ${error.message}` : `Save failed: ${error.message}`,
           'error'
         );
       }
@@ -1039,226 +958,3 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
 `;
 };
 
-export const viewTemplate = (lang = 'zh', file) => {
-  const isZh = lang === 'zh';
-
-  function getMimeType(filename) {
-    const extension = filename.split('.').pop().toLowerCase();
-    const mimeTypes = {
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'gif': 'image/gif',
-      'bmp': 'image/bmp',
-      'webp': 'image/webp',
-      'mp4': 'video/mp4',
-      'webm': 'video/webm',
-      'ogg': 'video/ogg',
-      'mp3': 'audio/mpeg',
-      'wav': 'audio/wav',
-      'flac': 'audio/flac',
-      'epub': 'application/epub+zip',
-      'pdf': 'application/pdf',
-      // 添加更多类型根据需要
-    };
-    return mimeTypes[extension] || 'application/octet-stream';
-  }
-
-  const mimeType = getMimeType(file.filename);
-  let contentHtml = '';
-
-  if (mimeType.startsWith('image/')) {
-    // 图片预览
-    contentHtml = `<img src="/file/${file.id}" alt="${file.filename}" style="max-width: 100%; height: auto;">`;
-  } else if (mimeType.startsWith('video/')) {
-    // 视频预览
-    contentHtml = `
-      <video controls style="max-width: 100%; height: auto;">
-        <source src="/file/${file.id}" type="${mimeType}">
-        ${isZh ? '您的浏览器不支持视频播放。' : 'Your browser does not support the video tag.'}
-      </video>
-    `;
-  } else if (mimeType.startsWith('audio/')) {
-    // 音频预览
-    contentHtml = `
-      <audio controls style="width: 100%;">
-        <source src="/file/${file.id}" type="${mimeType}">
-        ${isZh ? '您的浏览器不支持音频播放。' : 'Your browser does not support the audio element.'}
-      </audio>
-    `;
-  } else if (mimeType === 'application/epub+zip') {
-    // 电子书预览（简单处理，提供下载链接）
-    contentHtml = `
-      <p>${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
-      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
-    `;
-  } else if (mimeType === 'application/pdf') {
-    // PDF预览
-    contentHtml = `
-      <iframe src="/file/${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
-        ${isZh ? '您的浏览器不支持PDF预览。' : 'Your browser does not support PDF previews.'}
-      </iframe>
-    `;
-  } else {
-    // 其他类型，提供下载链接
-    contentHtml = `
-      <p>${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
-      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
-    `;
-  }
-
-  return `
-<!DOCTYPE html>
-<html lang="${isZh ? 'zh' : 'en'}">
-<head>
-  <meta charset="UTF-8">
-  <title>${isZh ? '浏览文件' : 'View File'}</title>
-  <style>
-    body { margin: 0; padding: 20px; background: #fff; color: #000; }
-    .container { position: relative; max-width: 1000px; margin: 0 auto; }
-    .download-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #000;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .download-btn:hover { background: #333; }
-    /* 响应式设计 */
-    @media (max-width: 600px) {
-      .download-btn {
-        padding: 5px 10px;
-        font-size: 14px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <button class="download-btn" onclick="confirmLogout(this)">${isZh ? '退出登录' : 'Logout'}</button>
-    ${contentHtml}
-  </div>
-  <script>
-    function confirmLogout(button) {
-      if (button.dataset.confirmed) {
-        // 执行登出
-        logout();
-      } else {
-        button.textContent =
-          ${isZh ? '"确认退出登录"' : '"Confirm Logout"'};
-        button.dataset.confirmed = true;
-        button.style.background = 'red';
-        setTimeout(() => {
-          button.textContent = ${isZh ? '"退出登录"' : '"Logout"'};
-          delete button.dataset.confirmed;
-          button.style.background = '#000';
-        }, 3000); // 3 秒后重置按钮
-      }
-    }
-
-    function logout() {
-      fetch('/logout', {
-        method: 'POST',
-      }).then(() => {
-        window.location.href = '/auth';
-      }).catch((error) => {
-        alert(${isZh ? '"退出登录失败"' : '"Failed to logout"'});
-      });
-    }
-  </script>
-</body>
-</html>
-`;
-};
-
-export const embedTemplate = (lang = 'zh', file) => {
-  const isZh = lang === 'zh';
-
-  function getMimeType(filename) {
-    const extension = filename.split('.').pop().toLowerCase();
-    const mimeTypes = {
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'gif': 'image/gif',
-      'bmp': 'image/bmp',
-      'webp': 'image/webp',
-      'mp4': 'video/mp4',
-      'webm': 'video/webm',
-      'ogg': 'video/ogg',
-      'mp3': 'audio/mpeg',
-      'wav': 'audio/wav',
-      'flac': 'audio/flac',
-      'epub': 'application/epub+zip',
-      'pdf': 'application/pdf',
-      // 添加更多类型根据需要
-    };
-    return mimeTypes[extension] || 'application/octet-stream';
-  }
-
-  const mimeType = getMimeType(file.filename);
-  let contentHtml = '';
-
-  if (mimeType.startsWith('image/')) {
-    // 图片预览
-    contentHtml = `<img src="/file/${file.id}" alt="${file.filename}" style="max-width: 100%; height: auto;">`;
-  } else if (mimeType.startsWith('video/')) {
-    // 视频预览
-    contentHtml = `
-      <video controls style="max-width: 100%; height: auto;">
-        <source src="/file/${file.id}" type="${mimeType}">
-        ${isZh ? '您的浏览器不支持视频播放。' : 'Your browser does not support the video tag.'}
-      </video>
-    `;
-  } else if (mimeType.startsWith('audio/')) {
-    // 音频预览
-    contentHtml = `
-      <audio controls style="width: 100%;">
-        <source src="/file/${file.id}" type="${mimeType}">
-        ${isZh ? '您的浏览器不支持音频播放。' : 'Your browser does not support the audio element.'}
-      </audio>
-    `;
-  } else if (mimeType === 'application/epub+zip') {
-    // 电子书预览（简单处理，提供下载链接）
-    contentHtml = `
-      <p>${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
-      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
-    `;
-  } else if (mimeType === 'application/pdf') {
-    // PDF预览
-    contentHtml = `
-      <iframe src="/file/${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
-        ${isZh ? '您的浏览器不支持PDF预览。' : 'Your browser does not support PDF previews.'}
-      </iframe>
-    `;
-  } else {
-    // 其他类型，提供下载链接
-    contentHtml = `
-      <p>${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
-      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
-    `;
-  }
-
-  return `
-<!DOCTYPE html>
-<html lang="${isZh ? 'zh' : 'en'}">
-<head>
-  <meta charset="UTF-8">
-  <title>${isZh ? '嵌入文件' : 'Embed File'}</title>
-  <style>
-    body { margin: 0; padding: 0; background: transparent; color: #000; }
-    .container { max-width: 100%; margin: 0 auto; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    ${contentHtml}
-  </div>
-</body>
-</html>
-`;
-};
