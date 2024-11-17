@@ -455,7 +455,7 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
   <div class="sidebar" id="sidebar">
     <button class="close-sidebar" onclick="closeSidebar()">×</button>
     <h2>${isZh ? '设置' : 'Settings'}</h2>
-    
+  
     <!-- 主题模式选择 -->
     <div class="section">
       <label for="themeSelect">${isZh ? '主题模式' : 'Theme Mode'}</label>
@@ -470,22 +470,22 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
     <div class="section">
       <label for="backgroundColor">${isZh ? '背景颜色' : 'Background Color'}</label>
       <input type="color" id="backgroundColor" value="${settings.backgroundColor || '#ffffff'}" onchange="updateThemeColor('backgroundColor', this.value)">
-      
+    
       <label for="textColor">${isZh ? '文字颜色' : 'Text Color'}</label>
       <input type="color" id="textColor" value="${settings.textColor || '#000000'}" onchange="updateThemeColor('textColor', this.value)">
-      
+    
       <label for="buttonColor">${isZh ? '按钮颜色' : 'Button Color'}</label>
       <input type="color" id="buttonColor" value="${settings.buttonColor || '#000000'}" onchange="updateThemeColor('buttonColor', this.value)">
-      
+    
       <label for="buttonTextColor">${isZh ? '按钮文字颜色' : 'Button Text Color'}</label>
       <input type="color" id="buttonTextColor" value="${settings.buttonTextColor || '#ffffff'}" onchange="updateThemeColor('buttonTextColor', this.value)">
-      
+    
       <label for="headerBackground">${isZh ? '头部背景' : 'Header Background'}</label>
       <input type="color" id="headerBackground" value="${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'}" onchange="updateThemeColor('headerBackground', this.value)">
-      
+    
       <label for="headerTextColor">${isZh ? '头部文字颜色' : 'Header Text Color'}</label>
-      <input type="color" id="headerTextColor" value="${settings.headerTextColor || '#000000'}" onchange="updateThemeColor('headerTextColor', this.value)}">
-      
+      <input type="color" id="headerTextColor" value="${settings.headerTextColor || '#000000'}" onchange="updateThemeColor('headerTextColor', this.value)">
+    
       <label for="backgroundImage">${isZh ? '背景图片 URL' : 'Background Image URL'}</label>
       <input type="text" id="backgroundImage" placeholder="${isZh ? '请输入图片链接' : 'Enter image URL'}" value="${settings.backgroundImage || ''}" onchange="updateThemeImage(this.value)">
     </div>
@@ -896,7 +896,7 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
       root.style.setProperty('--header-text-color', currentSettings.headerTextColor || '#000');
 
       // 设置背景图片
-      document.body.style.backgroundImage = currentSettings.backgroundImage ? `url('${currentSettings.backgroundImage}')` : '';
+      document.body.style.backgroundImage = currentSettings.backgroundImage ? \`url('\${currentSettings.backgroundImage}')\` : '';
     }
 
     // 语言切换
@@ -941,13 +941,13 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
         } else {
           const errorData = await response.json();
           showNotification(
-            isZh ? `保存失败: ${errorData.error}` : `Save failed: ${errorData.error}`,
+            isZh ? \`保存失败: \${errorData.error}\` : \`Save failed: \${errorData.error}\`,
             'error'
           );
         }
       } catch (error) {
         showNotification(
-          isZh ? `保存失败: ${error.message}` : `Save failed: ${error.message}`,
+          isZh ? \`保存失败: \${error.message}\` : \`Save failed: \${error.message}\`,
           'error'
         );
       }
@@ -957,4 +957,3 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
 </html>
 `;
 };
-
