@@ -1,5 +1,4 @@
-# CloudFlare 文件分享
-
+# CloudFlare 文件分享 
 [English](https://github.com/joyance-professional/cf-files-sharing/blob/main/README.md)｜[简体中文](https://github.com/joyance-professional/cf-files-sharing/blob/main/README-cn.md)
 
 一个运行在 Cloudflare Workers 上的简单文件分享工具，支持 R2 和 D1 双存储解决方案。
@@ -170,14 +169,36 @@ wrangler deploy
 
 ### 数据库结构
 
-```sql
-CREATE TABLE files (
+### 数据库结构
+
+```
+-- 文件元数据表
+CREATE TABLE file_metadata (
     id TEXT PRIMARY KEY,
     filename TEXT NOT NULL,
     size INTEGER NOT NULL,
     storage_type TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    content BLOB NULL
+    created_at TEXT NOT NULL
+);
+
+-- 文件内容表
+CREATE TABLE file_contents (
+    id TEXT PRIMARY KEY,
+    content BLOB NOT NULL
+);
+
+-- 设置表
+CREATE TABLE settings (
+    id TEXT PRIMARY KEY,
+    theme TEXT,
+    backgroundColor TEXT,
+    textColor TEXT,
+    buttonColor TEXT,
+    buttonTextColor TEXT,
+    headerBackground TEXT,
+    headerTextColor TEXT,
+    backgroundImage TEXT,
+    language TEXT
 );
 ```
 
