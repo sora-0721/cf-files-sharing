@@ -525,7 +525,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       selectedFiles.forEach((file) => {
         totalSize += file.size;
         const li = document.createElement('li');
-        li.textContent = file.fullPath ? \`\${file.fullPath} (\${formatSize(file.size)})\` : \`\${file.name} (\${formatSize(file.size)})\`;
+        li.textContent = file.fullPath ? '${file.fullPath} (${formatSize(file.size)})' : '${file.name} (${formatSize(file.size)})';
         fileList.appendChild(li);
       });
       const estimatedCost = (
@@ -534,8 +534,8 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       ).toFixed(2); // 假设每GB 0.02美元
       feeWarning.textContent =
         lang === 'zh'
-          ? \`预计费用：\$\${estimatedCost}\`
-          : \`Estimated cost: \$\${estimatedCost}\`;
+          ? '预计费用：$${estimatedCost}'
+          : 'Estimated cost: $${estimatedCost}';
     }
 
     async function uploadFiles() {
@@ -579,18 +579,14 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           }
 
           const data = await response.json();
-          const shareUrl = \`\${window.location.origin}/file/\${data.id}\`;
-          const viewUrl = \`\${window.location.origin}/view/\${data.id}\`;
-          const embedUrl = \`\${window.location.origin}/embed/\${data.id}\`;
+          const shareUrl = '${window.location.origin}/file/${data.id}';
+          const viewUrl = '${window.location.origin}/view/${data.id}';
+          const embedUrl = '${window.location.origin}/embed/${data.id}';
 
           uploadResult.style.display = 'block';
-          uploadResult.innerHTML += \`
-            <p>\${
-              lang === 'zh'
-                ? '文件上传成功：'
-                : 'File uploaded successfully:'
-            } <a href="\${shareUrl}" target="_blank">\${data.filename}</a> | <a href="\${viewUrl}" target="_blank">\${isZh ? '浏览' : 'View'}</a> | <a href="\${embedUrl}" target="_blank">\${isZh ? '嵌入' : 'Embed'}</a></p>
-          \`;
+          uploadResult.innerHTML += '
+            <p>${lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:'} <a href="${shareUrl}" target="_blank">${data.filename}</a> | <a href="${viewUrl}" target="_blank">${isZh ? '浏览' : 'View'}</a> | <a href="${embedUrl}" target="_blank">${isZh ? '嵌入' : 'Embed'}</a></p>
+          ';
 
           showNotification(
             lang === 'zh' ? '文件上传成功' : 'File uploaded successfully',
@@ -610,7 +606,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           errors.push((lang === 'zh' ? '上传失败: ' : 'Upload failed: ') + error.message);
         }
 
-        progressBar.style.width = \`\${((i + 1) / selectedFiles.length) * 100}%\`;
+        progressBar.style.width = '${((i + 1) / selectedFiles.length) * 100}%';
       }
 
       uploadingIndicator.style.display = 'none';
@@ -691,7 +687,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     }
 
     function copyLink(id, button) {
-      const link = \`\${window.location.origin}/file/\${id}\`;
+      const link = '${window.location.origin}/file/${id}';
       navigator.clipboard
         .writeText(link)
         .then(() => {
@@ -766,50 +762,50 @@ export const viewTemplate = (lang = 'zh', file) => {
 
   if (mimeType.startsWith('image/')) {
     // 图片预览
-    contentHtml = \`<img src="/file/\${file.id}" alt="\${file.filename}" style="max-width: 100%; height: auto;">\`;
+    contentHtml = `<img src="/file/${file.id}" alt="${file.filename}" style="max-width: 100%; height: auto;">`;
   } else if (mimeType.startsWith('video/')) {
     // 视频预览
-    contentHtml = \`
+    contentHtml = `
       <video controls style="max-width: 100%; height: auto;">
-        <source src="/file/\${file.id}" type="\${mimeType}">
+        <source src="/file/${file.id}" type="${mimeType}">
         ${isZh ? '您的浏览器不支持视频播放。' : 'Your browser does not support the video tag.'}
       </video>
-    \`;
+    `;
   } else if (mimeType.startsWith('audio/')) {
     // 音频预览
-    contentHtml = \`
+    contentHtml = `
       <audio controls style="width: 100%;">
-        <source src="/file/\${file.id}" type="\${mimeType}">
+        <source src="/file/${file.id}" type="${mimeType}">
         ${isZh ? '您的浏览器不支持音频播放。' : 'Your browser does not support the audio element.'}
       </audio>
-    \`;
+    `;
   } else if (mimeType === 'application/epub+zip') {
     // 电子书预览（简单处理，提供下载链接）
-    contentHtml = \`
-      <p>\${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
-      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
-    \`;
+    contentHtml = `
+      <p>${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
+      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
+    `;
   } else if (mimeType === 'application/pdf') {
     // PDF预览
-    contentHtml = \`
-      <iframe src="/file/\${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
+    contentHtml = `
+      <iframe src="/file/${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
         ${isZh ? '您的浏览器不支持PDF预览。' : 'Your browser does not support PDF previews.'}
       </iframe>
-    \`;
+    `;
   } else {
     // 其他类型，提供下载链接
-    contentHtml = \`
-      <p>\${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
-      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
-    \`;
+    contentHtml = `
+      <p>${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
+      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
+    `;
   }
 
-  return \`
+  return `
 <!DOCTYPE html>
-<html lang="\${isZh ? 'zh' : 'en'}">
+<html lang="${isZh ? 'zh' : 'en'}">
 <head>
   <meta charset="UTF-8">
-  <title>\${isZh ? '浏览文件' : 'View File'}</title>
+  <title>${isZh ? '浏览文件' : 'View File'}</title>
   <style>
     body { margin: 0; padding: 20px; background: #fff; color: #000; }
     .container { position: relative; max-width: 1000px; margin: 0 auto; }
@@ -830,16 +826,16 @@ export const viewTemplate = (lang = 'zh', file) => {
 <body>
   <div class="container">
     <button class="download-btn" onclick="downloadFile()">${isZh ? '下载' : 'Download'}</button>
-    \${contentHtml}
+    ${contentHtml}
   </div>
   <script>
     function downloadFile() {
-      window.location.href = '/file/\${file.id}';
+      window.location.href = '/file/${file.id}';
     }
   </script>
 </body>
 </html>
-\`;
+`;
 };
 
 export const embedTemplate = (lang = 'zh', file) => {
@@ -872,50 +868,50 @@ export const embedTemplate = (lang = 'zh', file) => {
 
   if (mimeType.startsWith('image/')) {
     // 图片预览
-    contentHtml = \`<img src="/file/\${file.id}" alt="\${file.filename}" style="max-width: 100%; height: auto;">\`;
+    contentHtml = `<img src="/file/${file.id}" alt="${file.filename}" style="max-width: 100%; height: auto;">`;
   } else if (mimeType.startsWith('video/')) {
     // 视频预览
-    contentHtml = \`
+    contentHtml = `
       <video controls style="max-width: 100%; height: auto;">
-        <source src="/file/\${file.id}" type="\${mimeType}">
+        <source src="/file/${file.id}" type="${mimeType}">
         ${isZh ? '您的浏览器不支持视频播放。' : 'Your browser does not support the video tag.'}
       </video>
-    \`;
+    `;
   } else if (mimeType.startsWith('audio/')) {
     // 音频预览
-    contentHtml = \`
+    contentHtml = `
       <audio controls style="width: 100%;">
-        <source src="/file/\${file.id}" type="\${mimeType}">
+        <source src="/file/${file.id}" type="${mimeType}">
         ${isZh ? '您的浏览器不支持音频播放。' : 'Your browser does not support the audio element.'}
       </audio>
-    \`;
+    `;
   } else if (mimeType === 'application/epub+zip') {
     // 电子书预览（简单处理，提供下载链接）
-    contentHtml = \`
-      <p>\${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
-      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
-    \`;
+    contentHtml = `
+      <p>${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
+      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
+    `;
   } else if (mimeType === 'application/pdf') {
     // PDF预览
-    contentHtml = \`
-      <iframe src="/file/\${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
+    contentHtml = `
+      <iframe src="/file/${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
         ${isZh ? '您的浏览器不支持PDF预览。' : 'Your browser does not support PDF previews.'}
       </iframe>
-    \`;
+    `;
   } else {
     // 其他类型，提供下载链接
-    contentHtml = \`
-      <p>\${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
-      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
-    \`;
+    contentHtml = `
+      <p>${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
+      <a href="/file/${file.id}" download="${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
+    `;
   }
 
-  return \`
+  return `
 <!DOCTYPE html>
-<html lang="\${isZh ? 'zh' : 'en'}">
+<html lang="${isZh ? 'zh' : 'en'}">
 <head>
   <meta charset="UTF-8">
-  <title>\${isZh ? '嵌入文件' : 'Embed File'}</title>
+  <title>${isZh ? '嵌入文件' : 'Embed File'}</title>
   <style>
     body { margin: 0; padding: 0; background: transparent; color: #000; }
     .container { max-width: 100%; margin: 0 auto; }
@@ -923,9 +919,9 @@ export const embedTemplate = (lang = 'zh', file) => {
 </head>
 <body>
   <div class="container">
-    \${contentHtml}
+    ${contentHtml}
   </div>
 </body>
 </html>
-\`;
+`;
 };
