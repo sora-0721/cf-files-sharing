@@ -585,9 +585,12 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           const embedUrl = '${window.location.origin}/embed/${data.id}';
 
           uploadResult.style.display = 'block';
-          uploadResult.innerHTML += '
-            <p>${lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:'} <a href="${shareUrl}" target="_blank">${data.filename}</a> | <a href="${viewUrl}" target="_blank">${isZh ? '浏览' : 'View'}</a> | <a href="${embedUrl}" target="_blank">${isZh ? '嵌入' : 'Embed'}</a></p>
-          ';
+          // 使用字符串连接避免模板字面量嵌套
+          uploadResult.innerHTML += '<p>' +
+            (lang === 'zh' ? '文件上传成功：' : 'File uploaded successfully:') +
+            ' <a href="' + shareUrl + '" target="_blank">' + data.filename + '</a> | ' +
+            ' <a href="/view/' + data.id + '" target="_blank">' + (isZh ? '浏览' : 'View') + '</a> | ' + 
+            ' <a href="/embed/' + data.id + '" target="_blank">' + (isZh ? '嵌入' : 'Embed') + '</a></p>';
 
           showNotification(
             lang === 'zh' ? '文件上传成功' : 'File uploaded successfully',
