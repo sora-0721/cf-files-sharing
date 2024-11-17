@@ -88,6 +88,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
     return (bytes / 1073741824).toFixed(2) + ' GB';
   }
+
   return `
 <!DOCTYPE html>
 <html lang="${isZh ? 'zh' : 'en'}">
@@ -233,7 +234,23 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     .file-table tr:last-child td {
       border-bottom: none;
     }
-    .delete-btn {
+    .delete-btn, .copy-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-right: 5px;
+    }
+    .delete-btn:hover {
+      background: red;
+    }
+    .copy-btn:hover {
+      background: #333;
+    }
+    .embed-btn {
       background: #000;
       color: #fff;
       border: none;
@@ -242,8 +259,8 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       cursor: pointer;
       transition: background 0.3s;
     }
-    .delete-btn:hover {
-      background: red;
+    .embed-btn:hover {
+      background: #333;
     }
     .fee-warning {
       margin-top: 1rem;
@@ -321,6 +338,26 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         padding: 5px 10px;
       }
     }
+    /* 错误记录表样式 */
+    .error-log {
+      background: #ffe6e6;
+      border: 1px solid #ffcccc;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+    .error-log h3 {
+      margin-top: 0;
+      color: red;
+    }
+    .error-log ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .error-log li {
+      color: red;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -329,10 +366,10 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     <div class="upload-form">
       <h2>${isZh ? '上传文件' : 'Upload File'}</h2>
       <div class="drag-drop" id="dragDropArea">
-        <p>${isZh ? '将文件拖拽到此处' : 'Drag and drop files here'}</p>
+        <p>${isZh ? '将文件或文件夹拖拽到此处' : 'Drag and drop files or folders here'}</p>
         <ul class="file-list" id="fileList"></ul>
-        <input type="file" id="fileInput" multiple>
-        <button class="open-btn" onclick="document.getElementById('fileInput').click()">${isZh ? '选择文件' : 'Choose Files'}</button>
+        <input type="file" id="fileInput" multiple webkitdirectory directory>
+        <button class="open-btn" onclick="document.getElementById('fileInput').click()">${isZh ? '选择文件/文件夹' : 'Choose Files/Folders'}</button>
         <button class="upload-btn" onclick="uploadFiles()">${isZh ? '上传' : 'Upload'}</button>
       </div>
       <div class="storage-options">
@@ -351,6 +388,10 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwgAAAAAAACH5BAEAAAEALAAAAAAQABAAAAIgjI+pq+D9mDEd0dW1HUFW6XoYAOw==" alt="Uploading">
       </div>
       <div class="result" id="uploadResult"></div>
+      <div class="error-log" id="errorLog" style="display: none;">
+        <h3>${isZh ? '错误记录' : 'Error Log'}</h3>
+        <ul id="errorList"></ul>
+      </div>
     </div>
 
     <table class="file-table">
@@ -361,6 +402,8 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           <th>${isZh ? '存储类型' : 'Storage Type'}</th>
           <th>${isZh ? '创建时间' : 'Created At'}</th>
           <th>${isZh ? '分享链接' : 'Share Link'}</th>
+          <th>${isZh ? '浏览链接' : 'View Link'}</th>
+          <th>${isZh ? '嵌入链接' : 'Embed Link'}</th>
           <th>${isZh ? '操作' : 'Actions'}</th>
         </tr>
       </thead>
@@ -376,13 +419,17 @@ export const mainTemplate = (lang = 'zh', files = []) => {
               lang === 'zh' ? 'zh-CN' : 'en-US'
             )}</td>
             <td>
-              <button onclick="copyLink('${file.id}', this)">${
-              isZh ? '复制链接' : 'Copy Link'
-            }</button>
+              <button class="copy-btn" onclick="copyLink('${file.id}', this)">${isZh ? '复制链接' : 'Copy Link'}</button>
             </td>
-            <td><button class="delete-btn" onclick="confirmDelete(this, '${
-              file.id
-            }')">${isZh ? '删除' : 'Delete'}</button></td>
+            <td>
+              <a href="/view/${file.id}" target="_blank">${isZh ? '浏览' : 'View'}</a>
+            </td>
+            <td>
+              <a href="/embed/${file.id}" target="_blank">${isZh ? '嵌入' : 'Embed'}</a>
+            </td>
+            <td>
+              <button class="delete-btn" onclick="confirmDelete(this, '${file.id}')">${isZh ? '删除' : 'Delete'}</button>
+            </td>
           </tr>
         `
           )
@@ -415,7 +462,11 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     const storageTypeSelect = document.getElementById('storageType');
     const notificationBar = document.getElementById('notificationBar');
     const notificationMessage = notificationBar.querySelector('.message');
+    const errorLog = document.getElementById('errorLog');
+    const errorList = document.getElementById('errorList');
     const lang = navigator.language.includes('zh') ? 'zh' : 'en';
+
+    let selectedFiles = [];
 
     dragDropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -426,26 +477,57 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       dragDropArea.classList.remove('hover');
     });
 
-    dragDropArea.addEventListener('drop', (e) => {
+    dragDropArea.addEventListener('drop', async (e) => {
       e.preventDefault();
       dragDropArea.classList.remove('hover');
-      fileInput.files = e.dataTransfer.files;
+      const items = e.dataTransfer.items;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i].webkitGetAsEntry();
+        if (item) {
+          await traverseFileTree(item);
+        }
+      }
       updateFileList();
     });
 
-    fileInput.addEventListener('change', updateFileList);
+    fileInput.addEventListener('change', async () => {
+      const files = fileInput.files;
+      for (let i = 0; i < files.length; i++) {
+        selectedFiles.push(files[i]);
+      }
+      updateFileList();
+    });
+
+    async function traverseFileTree(item, path = '') {
+      return new Promise((resolve) => {
+        if (item.isFile) {
+          item.file((file) => {
+            file.fullPath = path + file.name;
+            selectedFiles.push(file);
+            resolve();
+          });
+        } else if (item.isDirectory) {
+          const dirReader = item.createReader();
+          dirReader.readEntries((entries) => {
+            const promises = [];
+            for (let i = 0; i < entries.length; i++) {
+              promises.push(traverseFileTree(entries[i], path + item.name + '/'));
+            }
+            Promise.all(promises).then(() => resolve());
+          });
+        }
+      });
+    }
 
     function updateFileList() {
       fileList.innerHTML = '';
-      const files = fileInput.files;
       let totalSize = 0;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      selectedFiles.forEach((file) => {
         totalSize += file.size;
         const li = document.createElement('li');
-        li.textContent = file.name + ' (' + formatSize(file.size) + ')';
+        li.textContent = file.fullPath ? \`\${file.fullPath} (\${formatSize(file.size)})\` : \`\${file.name} (\${formatSize(file.size)})\`;
         fileList.appendChild(li);
-      }
+      });
       const estimatedCost = (
         (totalSize / (1024 * 1024 * 1024)) *
         0.02
@@ -457,18 +539,20 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     }
 
     async function uploadFiles() {
-      const files = fileInput.files;
-      if (files.length === 0) return;
+      if (selectedFiles.length === 0) return;
 
       progress.style.display = 'block';
       progressBar.style.width = '0%';
       uploadResult.style.display = 'none';
       uploadingIndicator.style.display = 'block';
+      errorLog.style.display = 'none';
+      errorList.innerHTML = '';
 
       const storageType = storageTypeSelect.value;
+      let errors = [];
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
 
         // 保留对存储介质的选择
         let currentStorageType = storageType;
@@ -480,7 +564,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         }
 
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', file, file.fullPath || file.name);
         formData.append('storage', currentStorageType);
 
         try {
@@ -496,6 +580,8 @@ export const mainTemplate = (lang = 'zh', files = []) => {
 
           const data = await response.json();
           const shareUrl = \`\${window.location.origin}/file/\${data.id}\`;
+          const viewUrl = \`\${window.location.origin}/view/\${data.id}\`;
+          const embedUrl = \`\${window.location.origin}/embed/\${data.id}\`;
 
           uploadResult.style.display = 'block';
           uploadResult.innerHTML += \`
@@ -503,7 +589,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
               lang === 'zh'
                 ? '文件上传成功：'
                 : 'File uploaded successfully:'
-            } <a href="\${shareUrl}" target="_blank">\${data.filename}</a></p>
+            } <a href="\${shareUrl}" target="_blank">\${data.filename}</a> | <a href="\${viewUrl}" target="_blank">\${isZh ? '浏览' : 'View'}</a> | <a href="\${embedUrl}" target="_blank">\${isZh ? '嵌入' : 'Embed'}</a></p>
           \`;
 
           showNotification(
@@ -521,17 +607,26 @@ export const mainTemplate = (lang = 'zh', files = []) => {
               error.message,
             'error'
           );
+          errors.push((lang === 'zh' ? '上传失败: ' : 'Upload failed: ') + error.message);
         }
 
-        progressBar.style.width = \`\${((i + 1) / files.length) * 100}%\`;
+        progressBar.style.width = \`\${((i + 1) / selectedFiles.length) * 100}%\`;
       }
 
       uploadingIndicator.style.display = 'none';
 
-      // 刷新页面以显示更新后的文件列表
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      if (errors.length > 0) {
+        errorLog.style.display = 'block';
+        errors.forEach((err) => {
+          const li = document.createElement('li');
+          li.textContent = err;
+          errorList.appendChild(li);
+        });
+      }
+
+      // 清空选中的文件
+      selectedFiles = [];
+      fileInput.value = '';
     }
 
     function showNotification(message, type = 'success') {
@@ -639,4 +734,198 @@ export const mainTemplate = (lang = 'zh', files = []) => {
 </body>
 </html>
 `;
+};
+
+export const viewTemplate = (lang = 'zh', file) => {
+  const isZh = lang === 'zh';
+
+  function getMimeType(filename) {
+    const extension = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+      'png': 'image/png',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'gif': 'image/gif',
+      'bmp': 'image/bmp',
+      'webp': 'image/webp',
+      'mp4': 'video/mp4',
+      'webm': 'video/webm',
+      'ogg': 'video/ogg',
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'flac': 'audio/flac',
+      'epub': 'application/epub+zip',
+      'pdf': 'application/pdf',
+      // 添加更多类型根据需要
+    };
+    return mimeTypes[extension] || 'application/octet-stream';
+  }
+
+  const mimeType = getMimeType(file.filename);
+  let contentHtml = '';
+
+  if (mimeType.startsWith('image/')) {
+    // 图片预览
+    contentHtml = \`<img src="/file/\${file.id}" alt="\${file.filename}" style="max-width: 100%; height: auto;">\`;
+  } else if (mimeType.startsWith('video/')) {
+    // 视频预览
+    contentHtml = \`
+      <video controls style="max-width: 100%; height: auto;">
+        <source src="/file/\${file.id}" type="\${mimeType}">
+        ${isZh ? '您的浏览器不支持视频播放。' : 'Your browser does not support the video tag.'}
+      </video>
+    \`;
+  } else if (mimeType.startsWith('audio/')) {
+    // 音频预览
+    contentHtml = \`
+      <audio controls style="width: 100%;">
+        <source src="/file/\${file.id}" type="\${mimeType}">
+        ${isZh ? '您的浏览器不支持音频播放。' : 'Your browser does not support the audio element.'}
+      </audio>
+    \`;
+  } else if (mimeType === 'application/epub+zip') {
+    // 电子书预览（简单处理，提供下载链接）
+    contentHtml = \`
+      <p>\${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
+      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
+    \`;
+  } else if (mimeType === 'application/pdf') {
+    // PDF预览
+    contentHtml = \`
+      <iframe src="/file/\${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
+        ${isZh ? '您的浏览器不支持PDF预览。' : 'Your browser does not support PDF previews.'}
+      </iframe>
+    \`;
+  } else {
+    // 其他类型，提供下载链接
+    contentHtml = \`
+      <p>\${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
+      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
+    \`;
+  }
+
+  return \`
+<!DOCTYPE html>
+<html lang="\${isZh ? 'zh' : 'en'}">
+<head>
+  <meta charset="UTF-8">
+  <title>\${isZh ? '浏览文件' : 'View File'}</title>
+  <style>
+    body { margin: 0; padding: 20px; background: #fff; color: #000; }
+    .container { position: relative; max-width: 1000px; margin: 0 auto; }
+    .download-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .download-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="download-btn" onclick="downloadFile()">${isZh ? '下载' : 'Download'}</button>
+    \${contentHtml}
+  </div>
+  <script>
+    function downloadFile() {
+      window.location.href = '/file/\${file.id}';
+    }
+  </script>
+</body>
+</html>
+\`;
+};
+
+export const embedTemplate = (lang = 'zh', file) => {
+  const isZh = lang === 'zh';
+
+  function getMimeType(filename) {
+    const extension = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+      'png': 'image/png',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'gif': 'image/gif',
+      'bmp': 'image/bmp',
+      'webp': 'image/webp',
+      'mp4': 'video/mp4',
+      'webm': 'video/webm',
+      'ogg': 'video/ogg',
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'flac': 'audio/flac',
+      'epub': 'application/epub+zip',
+      'pdf': 'application/pdf',
+      // 添加更多类型根据需要
+    };
+    return mimeTypes[extension] || 'application/octet-stream';
+  }
+
+  const mimeType = getMimeType(file.filename);
+  let contentHtml = '';
+
+  if (mimeType.startsWith('image/')) {
+    // 图片预览
+    contentHtml = \`<img src="/file/\${file.id}" alt="\${file.filename}" style="max-width: 100%; height: auto;">\`;
+  } else if (mimeType.startsWith('video/')) {
+    // 视频预览
+    contentHtml = \`
+      <video controls style="max-width: 100%; height: auto;">
+        <source src="/file/\${file.id}" type="\${mimeType}">
+        ${isZh ? '您的浏览器不支持视频播放。' : 'Your browser does not support the video tag.'}
+      </video>
+    \`;
+  } else if (mimeType.startsWith('audio/')) {
+    // 音频预览
+    contentHtml = \`
+      <audio controls style="width: 100%;">
+        <source src="/file/\${file.id}" type="\${mimeType}">
+        ${isZh ? '您的浏览器不支持音频播放。' : 'Your browser does not support the audio element.'}
+      </audio>
+    \`;
+  } else if (mimeType === 'application/epub+zip') {
+    // 电子书预览（简单处理，提供下载链接）
+    contentHtml = \`
+      <p>\${isZh ? '这是一个电子书文件。' : 'This is an eBook file.'}</p>
+      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载电子书' : 'Download eBook'}</a>
+    \`;
+  } else if (mimeType === 'application/pdf') {
+    // PDF预览
+    contentHtml = \`
+      <iframe src="/file/\${file.id}" style="width: 100%; height: 90vh;" frameborder="0">
+        ${isZh ? '您的浏览器不支持PDF预览。' : 'Your browser does not support PDF previews.'}
+      </iframe>
+    \`;
+  } else {
+    // 其他类型，提供下载链接
+    contentHtml = \`
+      <p>\${isZh ? '无法预览此文件类型。' : 'Cannot preview this file type.'}</p>
+      <a href="/file/\${file.id}" download="\${file.filename}">${isZh ? '下载文件' : 'Download File'}</a>
+    \`;
+  }
+
+  return \`
+<!DOCTYPE html>
+<html lang="\${isZh ? 'zh' : 'en'}">
+<head>
+  <meta charset="UTF-8">
+  <title>\${isZh ? '嵌入文件' : 'Embed File'}</title>
+  <style>
+    body { margin: 0; padding: 0; background: transparent; color: #000; }
+    .container { max-width: 100%; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    \${contentHtml}
+  </div>
+</body>
+</html>
+\`;
 };
