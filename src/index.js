@@ -209,7 +209,11 @@ export default {
       const files = await storageManager.list();
       const settings = await storageManager.loadSettings();
 
-      return htmlResponse(mainTemplate(lang, files, settings));
+      // 确保 files 是一个数组
+      const safeFiles = Array.isArray(files) ? files : [];
+      console.log(`Rendering mainTemplate with ${safeFiles.length} files and settings:`, settings);
+
+      return htmlResponse(mainTemplate(lang, safeFiles, settings));
     }
 
     return errorResponse(lang === 'zh' ? '未找到页面' : 'Not found', 404);
