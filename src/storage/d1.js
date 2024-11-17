@@ -3,13 +3,15 @@
 class D1Storage {
   constructor(db) {
     this.db = db;
-    // 假设数据库已经创建了所需的表
-    // 文件元数据表
+    // 定义表名
     this.metadataTable = 'file_metadata';
-    // 文件内容表
     this.fileContentsTable = 'file_contents';
-    // 设置表
     this.settingsTable = 'settings';
+  }
+
+  // 添加 prepare 方法
+  prepare(query) {
+    return this.db.prepare(query);
   }
 
   // 存储文件元数据
