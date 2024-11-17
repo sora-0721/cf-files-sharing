@@ -6,6 +6,8 @@ class D1Storage {
     // 假设数据库已经创建了所需的表
     // 文件元数据表
     this.metadataTable = 'file_metadata';
+    // 文件内容表
+    this.fileContentsTable = 'file_contents';
     // 设置表
     this.settingsTable = 'settings';
   }
@@ -56,7 +58,7 @@ class D1Storage {
     const buffer = Buffer.from(arrayBuffer);
 
     return await this.db.prepare(`
-      INSERT INTO file_contents (id, content)
+      INSERT INTO ${this.fileContentsTable} (id, content)
       VALUES (?, ?)
     `).bind(id, buffer).run();
   }
@@ -64,7 +66,7 @@ class D1Storage {
   // 获取文件内容从 D1
   async retrieve(id) {
     const result = await this.db.prepare(`
-      SELECT * FROM file_contents WHERE id = ?
+      SELECT * FROM ${this.fileContentsTable} WHERE id = ?
     `).bind(id).first();
 
     if (result) {
@@ -77,9 +79,15 @@ class D1Storage {
 
   // 删除文件内容从 D1
   async delete(id) {
-    return await this.db.prepare(`
-      DELETE FROM file_contents WHERE id = ?
-    `).bind(id).run();
+    try {
+      await this.db.prepare(`
+        DELETE FROM ${this.fileContentsTable} WHERE id = ?
+      `).bind(id).run();
+      return true;
+    } catch (error) {
+      console.error('D1 delete error:', error);
+      return false;
+    }
   }
 
   // 设置相关操作
