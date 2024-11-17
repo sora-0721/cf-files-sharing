@@ -27,6 +27,7 @@ export const loginTemplate = (lang = 'zh', message = '') => {
       width: 100%;
       max-width: 400px;
       margin: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     input {
       width: 100%;
@@ -121,6 +122,9 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       transition: background 0.3s;
       z-index: 1000;
     }
+    .logout-btn.confirm {
+      background: red;
+    }
     .logout-btn:hover {
       background: #333;
     }
@@ -134,6 +138,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .upload-section h2 {
       text-align: center;
@@ -144,6 +149,21 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       display: flex;
       gap: 1rem;
       justify-content: center;
+    }
+    .upload-buttons button {
+      flex: 1;
+      max-width: 200px;
+      padding: 10px 20px;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 16px;
+    }
+    .upload-buttons button:hover {
+      background: #333;
     }
     .drag-drop {
       border: 2px dashed #ccc;
@@ -157,6 +177,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      min-height: 150px;
     }
     .drag-drop.hover {
       background: #f9f9f9;
@@ -165,19 +186,6 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       margin: 0;
       font-size: 18px;
       color: #000;
-    }
-    .upload-btn {
-      padding: 10px 20px;
-      background: #000;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin-top: 1rem;
-    }
-    .upload-btn:hover {
-      background: #333;
     }
     .file-list {
       list-style: none;
@@ -193,8 +201,10 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       color: #000;
       word-break: break-all;
     }
-    .storage-options {
-      margin: 1rem 0;
+    .fee-warning {
+      margin-top: 1rem;
+      color: #666;
+      font-size: 0.9rem;
       text-align: center;
     }
     .progress {
@@ -211,6 +221,15 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       background: #000;
       width: 0%;
       transition: width 0.3s;
+    }
+    .uploading-indicator {
+      display: none;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .uploading-indicator img {
+      width: 50px;
+      height: 50px;
     }
     .result {
       margin-top: 1rem;
@@ -249,6 +268,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       border: 1px solid #ccc;
       border-radius: 8px;
       overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     table.file-table th, table.file-table td {
       border-bottom: 1px solid #ddd;
@@ -272,6 +292,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       cursor: pointer;
       transition: background 0.3s;
       margin-right: 5px;
+      font-size: 14px;
     }
     .delete-btn:hover {
       background: red;
@@ -281,21 +302,6 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     }
     .embed-btn:hover {
       background: #333;
-    }
-    .fee-warning {
-      margin-top: 1rem;
-      color: #666;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .uploading-indicator {
-      display: none;
-      margin-top: 1rem;
-      text-align: center;
-    }
-    .uploading-indicator img {
-      width: 50px;
-      height: 50px;
     }
     /* 通知栏样式 */
     #notificationBar {
@@ -342,13 +348,21 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       }
       .logout-btn {
         padding: 5px 10px;
+        font-size: 14px;
+      }
+      .upload-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .upload-buttons button {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="logout-btn" onclick="logout()">${isZh ? '退出登录' : 'Logout'}</button>
+    <button class="logout-btn" onclick="confirmLogout(this)">${isZh ? '退出登录' : 'Logout'}</button>
 
     <!-- 上传部分 -->
     <div class="upload-section">
@@ -559,7 +573,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       errorLog.style.display = 'none';
       errorList.innerHTML = '';
 
-      const storageType = document.getElementById('storageType').value;
+      const storageType = 'd1'; // 默认存储类型
       let errors = [];
 
       for (let i = 0; i < selectedFiles.length; i++) {
@@ -678,11 +692,11 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         button.textContent =
           isZh ? '确认删除' : 'Confirm Delete';
         button.dataset.confirmed = true;
-        button.style.background = 'red';
+        button.classList.add('confirm');
         setTimeout(() => {
           button.textContent = isZh ? '删除' : 'Delete';
           delete button.dataset.confirmed;
-          button.style.background = '#000';
+          button.classList.remove('confirm');
         }, 3000); // 3 秒后重置按钮
       }
     }
@@ -742,20 +756,34 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         });
     }
 
-    function logout() {
-      if (
-        confirm(
-          isZh
-            ? '确定要退出登录吗？'
-            : 'Are you sure you want to logout?'
-        )
-      ) {
-        fetch('/logout', {
-          method: 'POST',
-        }).then(() => {
-          window.location.href = '/auth';
-        });
+    function confirmLogout(button) {
+      if (button.dataset.confirmed) {
+        // 执行登出
+        logout();
+      } else {
+        button.textContent =
+          isZh ? '确认退出登录' : 'Confirm Logout';
+        button.dataset.confirmed = true;
+        button.classList.add('confirm');
+        setTimeout(() => {
+          button.textContent = isZh ? '退出登录' : 'Logout';
+          delete button.dataset.confirmed;
+          button.classList.remove('confirm');
+        }, 3000); // 3 秒后重置按钮
       }
+    }
+
+    function logout() {
+      fetch('/logout', {
+        method: 'POST',
+      }).then(() => {
+        window.location.href = '/auth';
+      }).catch((error) => {
+        showNotification(
+          isZh ? '退出登录失败' : 'Failed to logout',
+          'error'
+        );
+      });
     }
   </script>
 </body>
@@ -856,12 +884,39 @@ export const viewTemplate = (lang = 'zh', file) => {
 </head>
 <body>
   <div class="container">
-    <button class="download-btn" onclick="downloadFile()">${isZh ? '下载' : 'Download'}</button>
+    <button class="download-btn" onclick="confirmLogout(this)">${isZh ? '退出登录' : 'Logout'}</button>
     ${contentHtml}
   </div>
   <script>
     function downloadFile() {
       window.location.href = '/file/${file.id}';
+    }
+
+    function confirmLogout(button) {
+      if (button.dataset.confirmed) {
+        // 执行登出
+        logout();
+      } else {
+        button.textContent =
+          ${isZh ? '"确认退出登录"' : '"Confirm Logout"'};
+        button.dataset.confirmed = true;
+        button.style.background = 'red';
+        setTimeout(() => {
+          button.textContent = ${isZh ? '"退出登录"' : '"Logout"'};
+          delete button.dataset.confirmed;
+          button.style.background = '#000';
+        }, 3000); // 3 秒后重置按钮
+      }
+    }
+
+    function logout() {
+      fetch('/logout', {
+        method: 'POST',
+      }).then(() => {
+        window.location.href = '/auth';
+      }).catch((error) => {
+        alert(${isZh ? '"退出登录失败"' : '"Failed to logout"'});
+      });
     }
   </script>
 </body>
