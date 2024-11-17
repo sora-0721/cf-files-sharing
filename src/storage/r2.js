@@ -25,7 +25,7 @@ class R2Storage {
             await this.bucket.delete(id);
             return true;
         } catch (error) {
-            console.error('R2 delete error:', error);
+            console.error('R2 删除错误:', error);
             return false;
         }
     }
