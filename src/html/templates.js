@@ -9,6 +9,7 @@ export const loginTemplate = (lang = 'zh', message = '') => {
   <meta charset="UTF-8">
   <title>${isZh ? '登录 - 文件分享' : 'Login - File Share'}</title>
   <style>
+    /* 原有样式保持不变 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
@@ -80,7 +81,7 @@ export const loginTemplate = (lang = 'zh', message = '') => {
 `;
 };
 
-export const mainTemplate = (lang = 'zh', files = []) => {
+export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
   const isZh = lang === 'zh';
 
   function formatSize(bytes) {
@@ -90,6 +91,23 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     return (bytes / 1073741824).toFixed(2) + ' GB';
   }
 
+  // 应用主题设置
+  const themeStyles = `
+    :root {
+      --background-color: ${settings.backgroundColor || '#fff'};
+      --text-color: ${settings.textColor || '#000'};
+      --button-color: ${settings.buttonColor || '#000'};
+      --button-text-color: ${settings.buttonTextColor || '#fff'};
+      --header-background: ${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'};
+      --header-text-color: ${settings.headerTextColor || '#000'};
+    }
+  `;
+
+  // 设置背景图片
+  const backgroundImageStyle = settings.backgroundImage
+    ? `background-image: url('${settings.backgroundImage}'); background-size: cover;`
+    : '';
+
   return `
 <!DOCTYPE html>
 <html lang="${isZh ? 'zh' : 'en'}">
@@ -97,39 +115,42 @@ export const mainTemplate = (lang = 'zh', files = []) => {
   <meta charset="UTF-8">
   <title>${isZh ? '文件分享' : 'File Share'}</title>
   <style>
+    ${themeStyles}
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 20px;
-      background: #fff;
-      color: #000;
+      background: var(--background-color);
+      color: var(--text-color);
+      ${backgroundImageStyle}
+      transition: background 0.3s, color 0.3s;
     }
     .container {
       max-width: 800px;
       margin: 0 auto;
       position: relative;
     }
-    .logout-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #000;
-      color: #fff;
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .logout-btn, .settings-btn {
+      background: var(--button-color);
+      color: var(--button-text-color);
       border: none;
       padding: 10px 20px;
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.3s;
-      z-index: 1000;
     }
-    .logout-btn.confirm {
-      background: red;
-    }
-    .logout-btn:hover {
+    .logout-btn:hover, .settings-btn:hover {
       background: #333;
     }
     .upload-section {
-      background: #fff;
+      background: var(--header-background);
+      backdrop-filter: blur(10px);
       padding: 2rem;
       border-radius: 8px;
       border: 1px solid #ccc;
@@ -139,23 +160,25 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       flex-direction: column;
       gap: 1rem;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, border 0.3s;
     }
     .upload-section h2 {
       text-align: center;
       margin-bottom: 1.5rem;
-      color: #000;
+      color: var(--header-text-color);
     }
     .upload-buttons {
       display: flex;
       gap: 1rem;
       justify-content: center;
+      flex-wrap: wrap;
     }
     .upload-buttons button {
       flex: 1;
-      max-width: 200px;
+      min-width: 150px;
       padding: 10px 20px;
-      background: #000;
-      color: #fff;
+      background: var(--button-color);
+      color: var(--button-text-color);
       border: none;
       border-radius: 4px;
       cursor: pointer;
@@ -171,13 +194,14 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       text-align: center;
       transition: background 0.3s;
       border-radius: 8px;
-      background: #fff;
+      background: var(--background-color);
       flex-grow: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 150px;
+      color: var(--text-color);
     }
     .drag-drop.hover {
       background: #f9f9f9;
@@ -185,7 +209,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     .drag-drop p {
       margin: 0;
       font-size: 18px;
-      color: #000;
+      color: var(--text-color);
     }
     .file-list {
       list-style: none;
@@ -198,7 +222,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     }
     .file-list li {
       margin-bottom: 0.5rem;
-      color: #000;
+      color: var(--text-color);
       word-break: break-all;
     }
     .fee-warning {
@@ -218,7 +242,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     }
     .progress-bar {
       height: 100%;
-      background: #000;
+      background: var(--button-color);
       width: 0%;
       transition: width 0.3s;
     }
@@ -264,28 +288,29 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       width: 100%;
       border-collapse: collapse;
       margin-top: 2rem;
-      background: #fff;
+      background: var(--background-color);
       border: 1px solid #ccc;
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, border 0.3s;
     }
     table.file-table th, table.file-table td {
       border-bottom: 1px solid #ddd;
       padding: 12px;
       text-align: left;
-      color: #000;
+      color: var(--text-color);
     }
     table.file-table th {
       background: #f9f9f9;
-      color: #000;
+      color: var(--text-color);
     }
     table.file-table tr:last-child td {
       border-bottom: none;
     }
     .delete-btn, .copy-btn, .embed-btn {
-      background: #000;
-      color: #fff;
+      background: var(--button-color);
+      color: var(--button-text-color);
       border: none;
       padding: 6px 12px;
       border-radius: 4px;
@@ -311,8 +336,8 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       transform: translateX(-50%);
       width: 90%;
       max-width: 800px;
-      background: #000;
-      color: #fff;
+      background: var(--button-color);
+      color: var(--button-text-color);
       padding: 1rem;
       display: flex;
       align-items: center;
@@ -331,25 +356,79 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     #notificationBar .close-btn {
       background: none;
       border: none;
-      color: #fff;
+      color: var(--button-text-color);
       font-size: 1.5rem;
       cursor: pointer;
     }
+    /* 侧边栏样式 */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      transition: right 0.3s ease-in-out;
+      z-index: 1001;
+      color: var(--text-color);
+    }
+    .sidebar.active {
+      right: 0;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .sidebar .close-sidebar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+    .sidebar .section {
+      margin-bottom: 20px;
+    }
+    .sidebar label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .sidebar input[type="color"], .sidebar input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .sidebar select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .sidebar button {
+      width: 100%;
+      padding: 10px;
+      background: var(--button-color);
+      color: var(--button-text-color);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 16px;
+    }
+    .sidebar button:hover {
+      background: #333;
+    }
     /* 响应式设计 */
     @media (max-width: 600px) {
-      .upload-section {
-        padding: 1rem;
-      }
-      .drag-drop {
-        padding: 1rem;
-      }
-      table.file-table th, table.file-table td {
-        padding: 8px;
-      }
-      .logout-btn {
-        padding: 5px 10px;
-        font-size: 14px;
-      }
       .upload-buttons {
         flex-direction: column;
         gap: 0.5rem;
@@ -357,12 +436,26 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       .upload-buttons button {
         width: 100%;
       }
+      .logout-btn, .settings-btn {
+        padding: 5px 10px;
+        font-size: 14px;
+      }
+      .sidebar {
+        width: 100%;
+        right: -100%;
+      }
+      .sidebar.active {
+        right: 0;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="logout-btn" onclick="confirmLogout(this)">${isZh ? '退出登录' : 'Logout'}</button>
+    <div class="header">
+      <button class="settings-btn" onclick="openSidebar()">${isZh ? '设置' : 'Settings'}</button>
+      <button class="logout-btn" onclick="confirmLogout(this)">${isZh ? '退出登录' : 'Logout'}</button>
+    </div>
 
     <!-- 上传部分 -->
     <div class="upload-section">
@@ -440,6 +533,57 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     </table>
   </div>
 
+  <!-- 侧边栏 -->
+  <div class="sidebar" id="sidebar">
+    <button class="close-sidebar" onclick="closeSidebar()">×</button>
+    <h2>${isZh ? '设置' : 'Settings'}</h2>
+    
+    <!-- 主题模式选择 -->
+    <div class="section">
+      <label for="themeSelect">${isZh ? '主题模式' : 'Theme Mode'}</label>
+      <select id="themeSelect" onchange="changeTheme(this.value)">
+        <option value="default" ${settings.theme === 'default' ? 'selected' : ''}>${isZh ? '默认模式' : 'Default Mode'}</option>
+        <option value="dark" ${settings.theme === 'dark' ? 'selected' : ''}>${isZh ? '暗色模式' : 'Dark Mode'}</option>
+        <option value="art" ${settings.theme === 'art' ? 'selected' : ''}>${isZh ? '艺术模式' : 'Art Mode'}</option>
+      </select>
+    </div>
+
+    <!-- 自定义主题 -->
+    <div class="section">
+      <label for="backgroundColor">${isZh ? '背景颜色' : 'Background Color'}</label>
+      <input type="color" id="backgroundColor" value="${settings.backgroundColor || '#ffffff'}" onchange="updateThemeColor('backgroundColor', this.value)">
+      
+      <label for="textColor">${isZh ? '文字颜色' : 'Text Color'}</label>
+      <input type="color" id="textColor" value="${settings.textColor || '#000000'}" onchange="updateThemeColor('textColor', this.value)">
+      
+      <label for="buttonColor">${isZh ? '按钮颜色' : 'Button Color'}</label>
+      <input type="color" id="buttonColor" value="${settings.buttonColor || '#000000'}" onchange="updateThemeColor('buttonColor', this.value)">
+      
+      <label for="buttonTextColor">${isZh ? '按钮文字颜色' : 'Button Text Color'}</label>
+      <input type="color" id="buttonTextColor" value="${settings.buttonTextColor || '#ffffff'}" onchange="updateThemeColor('buttonTextColor', this.value)}">
+      
+      <label for="headerBackground">${isZh ? '头部背景' : 'Header Background'}</label>
+      <input type="color" id="headerBackground" value="${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'}" onchange="updateThemeColor('headerBackground', this.value)">
+      
+      <label for="headerTextColor">${isZh ? '头部文字颜色' : 'Header Text Color'}</label>
+      <input type="color" id="headerTextColor" value="${settings.headerTextColor || '#000000'}" onchange="updateThemeColor('headerTextColor', this.value)">
+      
+      <label for="backgroundImage">${isZh ? '背景图片 URL' : 'Background Image URL'}</label>
+      <input type="text" id="backgroundImage" placeholder="${isZh ? '请输入图片链接' : 'Enter image URL'}" value="${settings.backgroundImage || ''}" onchange="updateThemeImage(this.value)">
+    </div>
+
+    <!-- 语言切换 -->
+    <div class="section">
+      <label for="languageSelect">${isZh ? '语言' : 'Language'}</label>
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="zh" ${lang === 'zh' ? 'selected' : ''}>中文</option>
+        <option value="en" ${lang === 'en' ? 'selected' : ''}>English</option>
+      </select>
+    </div>
+
+    <button onclick="saveSettings()">${isZh ? '保存设置' : 'Save Settings'}</button>
+  </div>
+
   <div id="notificationBar">
     <span class="message"></span>
     <button class="close-btn" onclick="hideNotification()">×</button>
@@ -453,8 +597,9 @@ export const mainTemplate = (lang = 'zh', files = []) => {
       return (bytes / 1073741824).toFixed(2) + ' GB';
     }
 
-    // 将服务器端的 isZh 传递到客户端
+    // 将服务器端的 isZh 和 settings 传递到客户端
     const isZh = ${isZh ? 'true' : 'false'};
+    const initialSettings = ${JSON.stringify(settings)};
 
     // 上传相关元素
     const dragDropArea = document.getElementById('dragDropArea');
@@ -470,8 +615,12 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     const errorList = document.getElementById('errorList');
     const notificationBar = document.getElementById('notificationBar');
     const notificationMessage = notificationBar.querySelector('.message');
+    const sidebar = document.getElementById('sidebar');
+    const themeSelect = document.getElementById('themeSelect');
+    const languageSelect = document.getElementById('languageSelect');
 
     let selectedFiles = [];
+    let currentSettings = {...initialSettings}; // 深拷贝设置
 
     // 上传按钮事件
     function triggerFileUpload() {
@@ -503,6 +652,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         }
       }
       updateFileList();
+      uploadFiles(); // 自动开始上传
     });
 
     // 文件输入变化事件
@@ -512,6 +662,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         selectedFiles.push(files[i]);
       }
       updateFileList();
+      uploadFiles(); // 自动开始上传
     });
 
     // 文件夹输入变化事件
@@ -521,6 +672,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
         selectedFiles.push(files[i]);
       }
       updateFileList();
+      uploadFiles(); // 自动开始上传
     });
 
     async function traverseFileTree(item, path = '') {
@@ -673,7 +825,9 @@ export const mainTemplate = (lang = 'zh', files = []) => {
     function showNotification(message, type = 'success') {
       notificationMessage.textContent = message;
       notificationBar.style.background =
-        type === 'success' ? '#000' : 'red';
+        type === 'success' ? 'var(--button-color)' : 'red';
+      notificationBar.style.color =
+        type === 'success' ? 'var(--button-text-color)' : '#fff';
       notificationBar.classList.add('show');
       setTimeout(() => {
         hideNotification();
@@ -745,7 +899,7 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           setTimeout(() => {
             button.textContent =
               isZh ? '复制链接' : 'Copy Link';
-            button.style.background = '#000';
+            button.style.background = 'var(--button-color)';
           }, 2000);
         })
         .catch((err) => {
@@ -765,9 +919,11 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           isZh ? '确认退出登录' : 'Confirm Logout';
         button.dataset.confirmed = true;
         button.classList.add('confirm');
+        button.style.background = 'red';
         setTimeout(() => {
           button.textContent = isZh ? '退出登录' : 'Logout';
           delete button.dataset.confirmed;
+          button.style.background = 'var(--button-color)';
           button.classList.remove('confirm');
         }, 3000); // 3 秒后重置按钮
       }
@@ -784,6 +940,98 @@ export const mainTemplate = (lang = 'zh', files = []) => {
           'error'
         );
       });
+    }
+
+    // 侧边栏控制
+    function openSidebar() {
+      sidebar.classList.add('active');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+    }
+
+    // 主题切换
+    function changeTheme(theme) {
+      currentSettings.theme = theme;
+      applyTheme();
+    }
+
+    function updateThemeColor(colorProperty, value) {
+      currentSettings[colorProperty] = value;
+      applyTheme();
+    }
+
+    function updateThemeImage(url) {
+      currentSettings.backgroundImage = url;
+      applyTheme();
+    }
+
+    function applyTheme() {
+      const root = document.documentElement;
+      root.style.setProperty('--background-color', currentSettings.backgroundColor || '#fff');
+      root.style.setProperty('--text-color', currentSettings.textColor || '#000');
+      root.style.setProperty('--button-color', currentSettings.buttonColor || '#000');
+      root.style.setProperty('--button-text-color', currentSettings.buttonTextColor || '#fff');
+      root.style.setProperty('--header-background', currentSettings.headerBackground || 'rgba(255, 255, 255, 0.5)');
+      root.style.setProperty('--header-text-color', currentSettings.headerTextColor || '#000');
+
+      // 设置背景图片
+      document.body.style.backgroundImage = currentSettings.backgroundImage ? 'url('${currentSettings.backgroundImage}')' : '';
+    }
+
+    // 语言切换
+    function changeLanguage(lang) {
+      currentSettings.language = lang;
+      applyLanguage(lang);
+      saveSettings(); // 保存语言设置
+    }
+
+    function applyLanguage(lang) {
+      // 重新加载页面以应用语言更改
+      window.location.href = '/?lang=' + lang;
+    }
+
+    // 打开侧边栏时加载当前设置
+    window.onload = function() {
+      if (initialSettings) {
+        applyTheme();
+        if (initialSettings.language) {
+          languageSelect.value = initialSettings.language;
+        }
+      }
+    }
+
+    // 保存设置
+    async function saveSettings() {
+      try {
+        const response = await fetch('/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(currentSettings)
+        });
+
+        if (response.ok) {
+          showNotification(
+            isZh ? '设置已保存' : 'Settings saved',
+            'success'
+          );
+          closeSidebar();
+        } else {
+          const errorData = await response.json();
+          showNotification(
+            isZh ? '保存失败: ${errorData.error}' : 'Save failed: ${errorData.error}',
+            'error'
+          );
+        }
+      } catch (error) {
+        showNotification(
+          isZh ? '保存失败: ${error.message}' : 'Save failed: ${error.message}',
+          'error'
+        );
+      }
     }
   </script>
 </body>
@@ -880,6 +1128,13 @@ export const viewTemplate = (lang = 'zh', file) => {
       border-radius: 4px;
     }
     .download-btn:hover { background: #333; }
+    /* 响应式设计 */
+    @media (max-width: 600px) {
+      .download-btn {
+        padding: 5px 10px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
