@@ -39,9 +39,16 @@ class D1Storage {
 
   // 列出所有文件
   async list() {
-    return await this.db.prepare(`
-      SELECT * FROM ${this.metadataTable}
-    `).all();
+    try {
+      const results = await this.db.prepare(`
+        SELECT * FROM ${this.metadataTable}
+      `).all();
+      console.log(`D1Storage.list() returned ${results.length} records.`);
+      return Array.isArray(results) ? results : [];
+    } catch (error) {
+      console.error('D1Storage.list() error:', error);
+      return [];
+    }
   }
 
   // 存储文件内容到 D1（假设用于存储小文件）
@@ -67,16 +74,21 @@ class D1Storage {
 
   // 获取文件内容从 D1
   async retrieve(id) {
-    const result = await this.db.prepare(`
-      SELECT * FROM ${this.fileContentsTable} WHERE id = ?
-    `).bind(id).first();
+    try {
+      const result = await this.db.prepare(`
+        SELECT * FROM ${this.fileContentsTable} WHERE id = ?
+      `).bind(id).first();
 
-    if (result) {
-      return {
-        stream: result.content,
-      };
+      if (result) {
+        return {
+          stream: result.content,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('D1Storage.retrieve() error:', error);
+      return null;
     }
-    return null;
   }
 
   // 删除文件内容从 D1
@@ -87,7 +99,7 @@ class D1Storage {
       `).bind(id).run();
       return true;
     } catch (error) {
-      console.error('D1 delete error:', error);
+      console.error('D1Storage.delete() error:', error);
       return false;
     }
   }
@@ -114,9 +126,16 @@ class D1Storage {
   }
 
   async getAll(table) {
-    return await this.db.prepare(`
-      SELECT * FROM ${table}
-    `).all();
+    try {
+      const results = await this.db.prepare(`
+        SELECT * FROM ${table}
+      `).all();
+      console.log(`D1Storage.getAll(${table}) returned ${results.length} records.`);
+      return Array.isArray(results) ? results : [];
+    } catch (error) {
+      console.error(`D1Storage.getAll(${table}) error:`, error);
+      return [];
+    }
   }
 }
 
