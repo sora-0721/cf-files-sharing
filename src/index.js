@@ -12,7 +12,8 @@ export default {
 
     // 获取用户的语言偏好
     const acceptLanguage = request.headers.get('Accept-Language') || 'en';
-    const lang = acceptLanguage.includes('zh') ? 'zh' : 'en';
+    const langParam = url.searchParams.get('lang');
+    const lang = langParam ? langParam : (acceptLanguage.includes('zh') ? 'zh' : 'en');
 
     // 文件下载处理
     if (url.pathname.startsWith('/file/')) {
@@ -176,11 +177,39 @@ export default {
       return jsonResponse({ results });
     }
 
+    // 设置保存处理
+    if (url.pathname === '/settings' && request.method === 'POST') {
+      const requestBody = await request.json();
+      const userSettings = requestBody;
+
+      // 假设只有一个用户，或者基于token识别用户
+      // 这里简化处理，存储单个设置
+      try {
+        await storageManager.saveSettings(userSettings);
+        return jsonResponse({ success: true });
+      } catch (error) {
+        console.error('Settings save error:', error);
+        return jsonResponse({ error: error.message }, 500);
+      }
+    }
+
+    // 设置加载处理
+    if (url.pathname === '/settings' && request.method === 'GET') {
+      try {
+        const settings = await storageManager.loadSettings();
+        return jsonResponse({ settings });
+      } catch (error) {
+        console.error('Settings load error:', error);
+        return jsonResponse({ error: error.message }, 500);
+      }
+    }
+
     // 主页面
     if (url.pathname === '/') {
       const files = await storageManager.list();
+      const settings = await storageManager.loadSettings();
 
-      return htmlResponse(mainTemplate(lang, files));
+      return htmlResponse(mainTemplate(lang, files, settings));
     }
 
     return errorResponse(lang === 'zh' ? '未找到页面' : 'Not found', 404);
