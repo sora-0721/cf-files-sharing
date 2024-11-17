@@ -10,11 +10,11 @@ class StorageManager {
     this.d1Storage = new D1Storage(env.DB);
   }
 
-  async store(file, storageType) {
+  async store(file, storageType, filePath = '') {
     const id = generateId();
     const metadata = {
       id,
-      filename: file.name,
+      filename: filePath || file.name, // 使用完整路径
       size: file.size,
       storage_type: storageType,
       created_at: new Date().toISOString(),
@@ -79,6 +79,10 @@ class StorageManager {
     // 仅从 D1 获取文件列表
     const files = await this.d1Storage.list();
     return files;
+  }
+
+  async getMetadata(id) {
+    return await this.d1Storage.getMetadata(id);
   }
 }
 
