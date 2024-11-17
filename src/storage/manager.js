@@ -8,49 +8,6 @@ class StorageManager {
   constructor(env) {
     this.r2Storage = new R2Storage(env.FILE_BUCKET);
     this.d1Storage = new D1Storage(env.DB);
-    this.settingsTable = 'settings'; // 设置表名
-    this.metadataTable = 'file_metadata';
-    this.fileContentsTable = 'file_contents';
-
-    // 初始化数据库表
-    this.initializeTables();
-  }
-
-  async initializeTables() {
-    const queries = [
-      `CREATE TABLE IF NOT EXISTS ${this.metadataTable} (
-        id TEXT PRIMARY KEY,
-        filename TEXT NOT NULL,
-        size INTEGER NOT NULL,
-        storage_type TEXT NOT NULL,
-        created_at TEXT NOT NULL
-      );`,
-      `CREATE TABLE IF NOT EXISTS ${this.fileContentsTable} (
-        id TEXT PRIMARY KEY,
-        content BLOB NOT NULL
-      );`,
-      `CREATE TABLE IF NOT EXISTS ${this.settingsTable} (
-        id TEXT PRIMARY KEY,
-        theme TEXT,
-        backgroundColor TEXT,
-        textColor TEXT,
-        buttonColor TEXT,
-        buttonTextColor TEXT,
-        headerBackground TEXT,
-        headerTextColor TEXT,
-        backgroundImage TEXT,
-        language TEXT
-      );`
-    ];
-
-    try {
-      for (const query of queries) {
-        await this.d1Storage.prepare(query).run();
-      }
-      console.log('Database tables initialized');
-    } catch (error) {
-      console.error('Error initializing database tables:', error);
-    }
   }
 
   // 存储单个文件
@@ -122,35 +79,11 @@ class StorageManager {
   async list() {
     // 仅从 D1 获取文件列表
     const files = await this.d1Storage.list();
-    console.log(`StorageManager.list() received ${files.length} files.`);
-    return Array.isArray(files) ? files : [];
+    return files;
   }
 
   async getMetadata(id) {
     return await this.d1Storage.getMetadata(id);
-  }
-
-  // 设置相关方法
-  async saveSettings(settings) {
-    // 假设只有一个用户，或者基于token识别用户
-    // 这里简化处理，存储单个设置
-    const existing = await this.d1Storage.getAll(this.settingsTable);
-    if (existing.length > 0) {
-      // 更新现有设置
-      await this.d1Storage.update(this.settingsTable, { id: existing[0].id }, settings);
-    } else {
-      // 插入新设置
-      await this.d1Storage.insert(this.settingsTable, { ...settings, id: generateId(8) });
-    }
-  }
-
-  async loadSettings() {
-    const settings = await this.d1Storage.getAll(this.settingsTable);
-    if (settings.length > 0) {
-      return settings[0];
-    }
-    // 返回默认设置
-    return {};
   }
 }
 
