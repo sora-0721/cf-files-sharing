@@ -1,3 +1,108 @@
+// src/html/templates.js
+
+/**
+ * 登录页面模板
+ * @param {string} lang - 语言代码（'zh' 或 'en'）
+ * @param {object} settings - 主题设置
+ * @returns {string} HTML字符串
+ */
+export const loginTemplate = (lang = 'zh', settings = {}) => {
+  const isZh = lang === 'zh';
+
+  // 应用主题设置
+  const themeStyles = `
+    :root {
+      --background-color: ${settings.backgroundColor || '#fff'};
+      --text-color: ${settings.textColor || '#000'};
+      --button-color: ${settings.buttonColor || '#000'};
+      --button-text-color: ${settings.buttonTextColor || '#fff'};
+      --header-background: ${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'};
+      --header-text-color: ${settings.headerTextColor || '#000'};
+    }
+  `;
+
+  // 设置背景图片
+  const backgroundImageStyle = settings.backgroundImage
+    ? `background-image: url('${settings.backgroundImage}'); background-size: cover;`
+    : '';
+
+  return `
+<!DOCTYPE html>
+<html lang="${isZh ? 'zh' : 'en'}">
+<head>
+  <meta charset="UTF-8">
+  <title>${isZh ? '登录' : 'Login'}</title>
+  <style>
+    ${themeStyles}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--background-color);
+      color: var(--text-color);
+      ${backgroundImageStyle}
+      transition: background 0.3s, color 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    .login-container h2 {
+      margin-bottom: 1.5rem;
+      color: var(--header-text-color);
+    }
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background: var(--button-color);
+      color: var(--button-text-color);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 16px;
+    }
+    .login-container button:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>${isZh ? '登录' : 'Login'}</h2>
+    <form action="/login" method="POST">
+      <input type="text" name="username" placeholder="${isZh ? '用户名' : 'Username'}" required>
+      <input type="password" name="password" placeholder="${isZh ? '密码' : 'Password'}" required>
+      <button type="submit">${isZh ? '登录' : 'Login'}</button>
+    </form>
+  </div>
+</body>
+</html>
+`;
+};
+
+/**
+ * 主页面模板
+ * @param {string} lang - 语言代码（'zh' 或 'en'）
+ * @param {Array} files - 文件列表
+ * @param {object} settings - 主题设置
+ * @returns {string} HTML字符串
+ */
 export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
   const isZh = lang === 'zh';
 
@@ -951,6 +1056,206 @@ export const mainTemplate = (lang = 'zh', files = [], settings = {}) => {
           'error'
         );
       }
+    }
+  </script>
+</body>
+</html>
+`;
+};
+
+/**
+ * 查看文件详情页面模板
+ * @param {string} lang - 语言代码（'zh' 或 'en'）
+ * @param {object} file - 文件信息对象
+ * @param {object} settings - 主题设置
+ * @returns {string} HTML字符串
+ */
+export const viewTemplate = (lang = 'zh', file = {}, settings = {}) => {
+  const isZh = lang === 'zh';
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+  }
+
+  // 应用主题设置
+  const themeStyles = `
+    :root {
+      --background-color: ${settings.backgroundColor || '#fff'};
+      --text-color: ${settings.textColor || '#000'};
+      --button-color: ${settings.buttonColor || '#000'};
+      --button-text-color: ${settings.buttonTextColor || '#fff'};
+      --header-background: ${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'};
+      --header-text-color: ${settings.headerTextColor || '#000'};
+    }
+  `;
+
+  // 设置背景图片
+  const backgroundImageStyle = settings.backgroundImage
+    ? `background-image: url('${settings.backgroundImage}'); background-size: cover;`
+    : '';
+
+  return `
+<!DOCTYPE html>
+<html lang="${isZh ? 'zh' : 'en'}">
+<head>
+  <meta charset="UTF-8">
+  <title>${isZh ? '查看文件' : 'View File'}</title>
+  <style>
+    ${themeStyles}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--background-color);
+      color: var(--text-color);
+      ${backgroundImageStyle}
+      transition: background 0.3s, color 0.3s;
+    }
+    .file-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .file-container h2 {
+      margin-bottom: 1.5rem;
+      color: var(--header-text-color);
+    }
+    .file-container p {
+      margin: 0.5rem 0;
+      font-size: 1.1rem;
+    }
+    .file-container a {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 10px 20px;
+      background: var(--button-color);
+      color: var(--button-text-color);
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    .file-container a:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="file-container">
+    <h2>${isZh ? '文件详情' : 'File Details'}</h2>
+    <p><strong>${isZh ? '文件名' : 'Filename'}:</strong> ${file.filename}</p>
+    <p><strong>${isZh ? '大小' : 'Size'}:</strong> ${formatSize(file.size)}</p>
+    <p><strong>${isZh ? '存储类型' : 'Storage Type'}:</strong> ${file.storage_type.toUpperCase()}</p>
+    <p><strong>${isZh ? '创建时间' : 'Created At'}:</strong> ${new Date(file.created_at).toLocaleString(isZh ? 'zh-CN' : 'en-US')}</p>
+    <a href="/download/${file.id}" target="_blank">${isZh ? '下载文件' : 'Download File'}</a>
+  </div>
+</body>
+</html>
+`;
+};
+
+/**
+ * 嵌入文件页面模板
+ * @param {string} lang - 语言代码（'zh' 或 'en'）
+ * @param {object} file - 文件信息对象
+ * @param {object} settings - 主题设置
+ * @returns {string} HTML字符串
+ */
+export const embedTemplate = (lang = 'zh', file = {}, settings = {}) => {
+  const isZh = lang === 'zh';
+
+  // 应用主题设置
+  const themeStyles = `
+    :root {
+      --background-color: ${settings.backgroundColor || '#fff'};
+      --text-color: ${settings.textColor || '#000'};
+      --button-color: ${settings.buttonColor || '#000'};
+      --button-text-color: ${settings.buttonTextColor || '#fff'};
+      --header-background: ${settings.headerBackground || 'rgba(255, 255, 255, 0.5)'};
+      --header-text-color: ${settings.headerTextColor || '#000'};
+    }
+  `;
+
+  // 设置背景图片
+  const backgroundImageStyle = settings.backgroundImage
+    ? `background-image: url('${settings.backgroundImage}'); background-size: cover;`
+    : '';
+
+  return `
+<!DOCTYPE html>
+<html lang="${isZh ? 'zh' : 'en'}">
+<head>
+  <meta charset="UTF-8">
+  <title>${isZh ? '嵌入文件' : 'Embed File'}</title>
+  <style>
+    ${themeStyles}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--background-color);
+      color: var(--text-color);
+      ${backgroundImageStyle}
+      transition: background 0.3s, color 0.3s;
+    }
+    .embed-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .embed-container h2 {
+      margin-bottom: 1.5rem;
+      color: var(--header-text-color);
+    }
+    .embed-container textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: none;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .embed-container button {
+      margin-top: 1rem;
+      padding: 10px 20px;
+      background: var(--button-color);
+      color: var(--button-text-color);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 16px;
+    }
+    .embed-container button:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="embed-container">
+    <h2>${isZh ? '嵌入文件' : 'Embed File'}</h2>
+    <textarea readonly onclick="this.select()">${window.location.origin}/embed/${file.id}</textarea>
+    <button onclick="copyEmbedCode()">${isZh ? '复制代码' : 'Copy Code'}</button>
+  </div>
+  
+  <script>
+    function copyEmbedCode() {
+      const textarea = document.querySelector('.embed-container textarea');
+      textarea.select();
+      document.execCommand('copy');
+      alert('${isZh ? '代码已复制到剪贴板' : 'Embed code copied to clipboard'}');
     }
   </script>
 </body>
