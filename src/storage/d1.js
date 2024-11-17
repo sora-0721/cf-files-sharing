@@ -3,152 +3,110 @@
 class D1Storage {
   constructor(db) {
     this.db = db;
+    // 假设数据库已经创建了所需的表
+    // 文件元数据表
+    this.metadataTable = 'file_metadata';
+    // 设置表
+    this.settingsTable = 'settings';
   }
 
-  // 存储文件（用于存储在 D1 中的文件）
-  async store(id, file) {
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      // 将 ArrayBuffer 转换为 Base64 字符串
-      const base64String = this.arrayBufferToBase64(arrayBuffer);
-
-      await this.db
-        .prepare(
-          'INSERT INTO files (id, filename, size, storage_type, created_at, content) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)'
-        )
-        .bind(id, file.name, file.size, 'd1', base64String)
-        .run();
-    } catch (error) {
-      console.error('D1 store error:', error);
-      throw error;
-    }
-  }
-
-  // 存储元数据（用于存储在 R2 中的文件）
+  // 存储文件元数据
   async storeMetadata(metadata) {
-    try {
-      await this.db
-        .prepare(
-          'INSERT INTO files (id, filename, size, storage_type, created_at) VALUES (?, ?, ?, ?, ?)'
-        )
-        .bind(
-          metadata.id,
-          metadata.filename,
-          metadata.size,
-          metadata.storage_type,
-          metadata.created_at
-        )
-        .run();
-    } catch (error) {
-      console.error('D1 storeMetadata error:', error);
-      throw error;
-    }
+    return await this.db.prepare(`
+      INSERT INTO ${this.metadataTable} (id, filename, size, storage_type, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(metadata.id, metadata.filename, metadata.size, metadata.storage_type, metadata.created_at).run();
   }
 
-  // 获取文件内容和元数据
-  async retrieve(id) {
-    try {
-      const result = await this.db
-        .prepare('SELECT * FROM files WHERE id = ?')
-        .bind(id)
-        .first();
-
-      if (result && result.content) {
-        // 将 Base64 字符串解码回 ArrayBuffer
-        const arrayBuffer = this.base64ToArrayBuffer(result.content);
-
-        return {
-          stream: new Response(arrayBuffer).body,
-          filename: result.filename,
-          storage_type: 'd1',
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('D1 retrieve error:', error);
-      throw error;
-    }
-  }
-
-  // 获取元数据
+  // 获取文件元数据
   async getMetadata(id) {
-    try {
-      const result = await this.db
-        .prepare(
-          'SELECT id, filename, size, storage_type, created_at FROM files WHERE id = ?'
-        )
-        .bind(id)
-        .first();
-      return result;
-    } catch (error) {
-      console.error('D1 getMetadata error:', error);
-      return null;
-    }
+    const result = await this.db.prepare(`
+      SELECT * FROM ${this.metadataTable} WHERE id = ?
+    `).bind(id).first();
+    return result;
   }
 
-  // 删除文件内容和元数据
-  async delete(id) {
-    try {
-      const result = await this.db
-        .prepare('DELETE FROM files WHERE id = ?')
-        .bind(id)
-        .run();
-      return result.success;
-    } catch (error) {
-      console.error('D1 delete error:', error);
-      return false;
-    }
-  }
-
-  // 删除元数据（用于 R2 存储的文件）
+  // 删除文件元数据
   async deleteMetadata(id) {
-    try {
-      const result = await this.db
-        .prepare('DELETE FROM files WHERE id = ?')
-        .bind(id)
-        .run();
-      return result.success;
-    } catch (error) {
-      console.error('D1 deleteMetadata error:', error);
-      return false;
-    }
+    return await this.db.prepare(`
+      DELETE FROM ${this.metadataTable} WHERE id = ?
+    `).bind(id).run();
   }
 
   // 列出所有文件
   async list() {
-    try {
-      const results = await this.db
-        .prepare(
-          'SELECT id, filename, size, storage_type, created_at FROM files ORDER BY created_at DESC'
-        )
-        .all();
-      return results.results || [];
-    } catch (error) {
-      console.error('D1 list error:', error);
-      return [];
-    }
+    return await this.db.prepare(`
+      SELECT * FROM ${this.metadataTable}
+    `).all();
   }
 
-  // 工具函数：ArrayBuffer 转 Base64
-  arrayBufferToBase64(buffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
+  // 存储文件内容到 D1（假设用于存储小文件）
+  async store(id, file) {
+    const reader = file.stream.getReader();
+    let chunks = [];
+    let done, value;
+    while (!done) {
+      ({ done, value } = await reader.read());
+      if (value) {
+        chunks.push(...value);
+      }
     }
-    return btoa(binary);
+    const blob = new Blob([new Uint8Array(chunks)]);
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    return await this.db.prepare(`
+      INSERT INTO file_contents (id, content)
+      VALUES (?, ?)
+    `).bind(id, buffer).run();
   }
 
-  // 工具函数：Base64 转 ArrayBuffer
-  base64ToArrayBuffer(base64) {
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+  // 获取文件内容从 D1
+  async retrieve(id) {
+    const result = await this.db.prepare(`
+      SELECT * FROM file_contents WHERE id = ?
+    `).bind(id).first();
+
+    if (result) {
+      return {
+        stream: result.content,
+      };
     }
-    return bytes.buffer;
+    return null;
+  }
+
+  // 删除文件内容从 D1
+  async delete(id) {
+    return await this.db.prepare(`
+      DELETE FROM file_contents WHERE id = ?
+    `).bind(id).run();
+  }
+
+  // 设置相关操作
+  async insert(table, data) {
+    const keys = Object.keys(data).join(', ');
+    const placeholders = Object.keys(data).map(() => '?').join(', ');
+    const values = Object.values(data);
+    return await this.db.prepare(`
+      INSERT INTO ${table} (${keys})
+      VALUES (${placeholders})
+    `).bind(...values).run();
+  }
+
+  async update(table, condition, data) {
+    const setClause = Object.keys(data).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(data);
+    const conditionKeys = Object.keys(condition);
+    const conditionValues = Object.values(condition);
+    return await this.db.prepare(`
+      UPDATE ${table} SET ${setClause} WHERE ${conditionKeys.map(key => `${key} = ?`).join(' AND ')}
+    `).bind(...values, ...conditionValues).run();
+  }
+
+  async getAll(table) {
+    return await this.db.prepare(`
+      SELECT * FROM ${table}
+    `).all();
   }
 }
 
