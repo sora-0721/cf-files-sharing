@@ -84,7 +84,7 @@
 3.安装wrangler：
 
   ```bash
-   npm install wrangler --save-dev
+   npm install -g wrangler
    ```
 
 4. 登录 Cloudflare：
