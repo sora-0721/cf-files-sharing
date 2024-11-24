@@ -57,8 +57,14 @@ Access the sharing link → Parse the file ID → Determine storage location →
    ```bash
    npm install
    ```
+   
+3. Install wrangler：
 
-3. Log in to Cloudflare:
+  ```bash
+   npm install wrangler --save-dev
+   ```
+
+4. Log in to Cloudflare:
 
    ```bash
    wrangler login
