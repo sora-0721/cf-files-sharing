@@ -4,7 +4,6 @@
 
 A simple file sharing tool running on Cloudflare Workers, supporting R2 and D1 dual storage solutions.
 
-expample web | [view](https://files-ep.joyance.page)
 
 ![1.png](https://images.joyance.page/api/rfile/1.png)
 
