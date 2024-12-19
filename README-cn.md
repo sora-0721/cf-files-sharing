@@ -2,7 +2,7 @@
 [English](https://github.com/joyance-professional/cf-files-sharing/blob/main/README.md)｜[简体中文](https://github.com/joyance-professional/cf-files-sharing/blob/main/README-cn.md)
 
 一个运行在 Cloudflare Workers 上的简单文件分享工具，支持 R2 和 D1 双存储解决方案。
-示例页面| [view](https://files-ep.joyance.page)
+
 ## 特性
 
 - 🔐 密码保护，支持基于 cookie 的持久登录（30 天）
