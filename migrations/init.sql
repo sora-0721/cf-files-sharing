@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS files (
     filename TEXT NOT NULL,
     size INTEGER NOT NULL,
     storage_type TEXT NOT NULL,
+    previewEnabled INTEGER DEFAULT 0，
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     content BLOB
 );
