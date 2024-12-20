@@ -43,8 +43,29 @@ class R2Storage {
 
   async list() {
     try {
-      const objects = await this.bucket.list();
-      const files = objects.objects.map(obj => {
+      const options = {
+        limit: 500,
+        include: ["customMetadata"],
+      };
+      
+      const listed = await this.bucket.list(options);
+      
+      let truncated = listed.truncated;
+      let cursor = truncated ? listed.cursor : undefined;
+      
+      // ✅ - use the truncated property to check if there are more
+      // objects to be returned
+      while (truncated) {
+        const next = await this.bucket.list.list({
+          ...options,
+          cursor: cursor,
+        });
+        listed.objects.push(...next.objects);
+      
+        truncated = next.truncated;
+        cursor = next.cursor;
+      }
+      const files = listed.objects.map(obj => {
         return {
           id: obj.key,
           filename: obj.customMetadata?.filename || 'unknown',
