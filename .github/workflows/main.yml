@@ -23,6 +23,5 @@ jobs:
           accountId: ${{secrets.CF_ACCOUNT_ID}}
           preCommands: wrangler d1 execute file-share --file=./migrations/init.sql --remote
           command: deploy
-          environment: production
           secrets: |
             AUTH_PASSWORD
