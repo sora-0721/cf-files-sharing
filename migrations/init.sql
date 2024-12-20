@@ -1,9 +1,10 @@
 CREATE TABLE IF NOT EXISTS files (
     id TEXT PRIMARY KEY,
     filename TEXT NOT NULL,
+    path TEXT NOT NULL,
     size INTEGER NOT NULL,
     storage_type TEXT NOT NULL,
-    previewEnabled INTEGER DEFAULT 0，
+    preview_enabled INTEGER DEFAULT 0，
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     content BLOB
 );
