@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS files (
     path TEXT NOT NULL,
     size INTEGER NOT NULL,
     storage_type TEXT NOT NULL,
-    preview_enabled INTEGER DEFAULT 0，
+    preview_enabled BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     content BLOB
 );
