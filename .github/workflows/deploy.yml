@@ -17,9 +17,11 @@ jobs:
       - name: Publish
         uses: cloudflare/wrangler-action@v3
         env:
-          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD || 'changeit' }}
+          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{secrets.CF_ACCOUNT_ID}}
           preCommands: wrangler d1 execute file-share --file=./migrations/init.sql --remote
-          environment: production
+          command: deploy
+          secrets: |
+            AUTH_PASSWORD
