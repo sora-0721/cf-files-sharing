@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout repository
@@ -16,7 +16,7 @@ jobs:
     - name: Install Wrangler
       run: npm install -g wrangler
 
-    - name: Publish to Cloudflare
-      run: wrangler publish
+    - name: Deploy to Cloudflare
+      run: wrangler deploy
       env:
-        CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
